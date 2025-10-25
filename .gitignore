@@ -1,0 +1,78 @@
+# VaiQui - Git Ignore File
+
+# File di configurazione sensibili
+config/database.php
+config/settings.php
+.env
+.env.local
+
+# Log files
+*.log
+logs/
+error.log
+access.log
+
+# Cache e file temporanei
+cache/
+tmp/
+temp/
+*.tmp
+*.temp
+
+# File di sistema
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE e editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Uploads e file utente (se presenti)
+uploads/
+user_files/
+
+# File di test (opzionale - rimuovi se vuoi includerli)
+test_*.php
+debug_*.php
+
+# Node modules (se presenti)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Composer (se presente)
+vendor/
+composer.lock
+
+# File di configurazione locale
+config.local.php
+database.local.php
+
+# File di sessione
+sessions/
+sess_*
+
+# File di errore PHP
+php_errors.log
+
+# File di configurazione Plesk
+.plesk/
+plesk.conf
+
+# File di backup automatici
+*.sql.backup
+*.db.backup

@@ -1,0 +1,70 @@
+name: Deploy to Plesk Server
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.0'
+        extensions: pdo, pdo_mysql, curl, json, gd
+        
+    - name: Validate PHP syntax
+      run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
+      
+    - name: Check for sensitive files
+      run: |
+        if [ -f "config/database.php" ]; then
+          echo "❌ config/database.php found in repository!"
+          echo "This file contains sensitive information and should not be committed."
+          exit 1
+        fi
+        echo "✅ No sensitive files found"
+        
+    - name: Create deployment package
+      run: |
+        # Crea un archivio senza file sensibili
+        tar -czf vaiqui-deploy.tar.gz \
+          --exclude='config/database.php' \
+          --exclude='.env' \
+          --exclude='logs/*' \
+          --exclude='cache/*' \
+          --exclude='uploads/*' \
+          --exclude='backups/*' \
+          --exclude='.git' \
+          .
+          
+    - name: Upload deployment package
+      uses: actions/upload-artifact@v3
+      with:
+        name: vaiqui-deploy
+        path: vaiqui-deploy.tar.gz
+        
+    # Deploy solo se è un push su main
+    - name: Deploy to server
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        echo "🚀 Deploying to production server..."
+        # Qui potresti aggiungere comandi per deploy automatico
+        # Esempio con SSH (richiede configurazione secrets):
+        # ssh user@server.com "cd /path/to/vaiqui && git pull origin main"
+        
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Deployment completed successfully"
+        else
+          echo "❌ Deployment failed"
+        fi

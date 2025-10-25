@@ -1,0 +1,100 @@
+{
+  "project": {
+    "name": "VaiQui",
+    "description": "Il tuo Linktree personale",
+    "version": "1.2.0",
+    "author": "VaiQui Team"
+  },
+  "requirements": {
+    "php": "7.4+",
+    "mysql": "5.7+",
+    "extensions": [
+      "pdo",
+      "pdo_mysql", 
+      "curl",
+      "json",
+      "gd"
+    ]
+  },
+  "deployment": {
+    "platforms": {
+      "plesk": {
+        "recommended": true,
+        "setup_script": "plesk-setup.sh",
+        "webhook": "webhook.php"
+      },
+      "cpanel": {
+        "setup_script": "cpanel-setup.sh",
+        "notes": "Adatta gli script per cPanel"
+      },
+      "vps": {
+        "setup_script": "vps-setup.sh",
+        "notes": "Per server VPS dedicati"
+      }
+    }
+  },
+  "database": {
+    "tables": [
+      "users",
+      "links", 
+      "analytics",
+      "short_links",
+      "short_link_clicks",
+      "dynamic_links",
+      "settings"
+    ],
+    "setup_script": "database_update.sql"
+  },
+  "security": {
+    "sensitive_files": [
+      "config/database.php",
+      ".env",
+      "logs/*",
+      "cache/*"
+    ],
+    "permissions": {
+      "directories": "755",
+      "php_files": "644",
+      "htaccess": "644"
+    }
+  },
+  "features": {
+    "social_login": {
+      "google": true,
+      "facebook": false,
+      "twitter": false
+    },
+    "customization": {
+      "themes": true,
+      "colors": true,
+      "fonts": true,
+      "css": true
+    },
+    "analytics": {
+      "basic": true,
+      "advanced": true,
+      "export": true
+    },
+    "links": {
+      "shortened": true,
+      "qr_codes": true,
+      "dynamic": true,
+      "scheduled": true
+    },
+    "location": {
+      "address": true,
+      "map": true,
+      "geocoding": true
+    }
+  },
+  "monitoring": {
+    "health_check": "monitor.php",
+    "logs": "logs/error.log",
+    "backup": "backup.sh"
+  },
+  "github": {
+    "webhook_secret": "your_webhook_secret_here",
+    "branch": "main",
+    "auto_deploy": true
+  }
+}
