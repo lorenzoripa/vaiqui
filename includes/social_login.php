@@ -1,5 +1,5 @@
 <?php
-require_once 'config/database.php';
+require_once __DIR__ . '/../config/database.php';
 
 // Carica configurazione Google se esiste
 $google_config_file = __DIR__ . '/../config/google_config.php';

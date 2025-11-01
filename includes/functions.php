@@ -1,5 +1,5 @@
 <?php
-require_once 'config/database.php';
+require_once __DIR__ . '/../config/database.php';
 
 // Funzione per registrare un nuovo utente
 function registerUser($username, $email, $password) {
