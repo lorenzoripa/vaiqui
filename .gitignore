@@ -3,6 +3,7 @@
 # File di configurazione sensibili
 config/database.php
 config/settings.php
+config/google_config.php
 .env
 .env.local
 
