@@ -1,10 +1,25 @@
 <?php
 require_once 'config/database.php';
 
-// Configurazioni per social login
-define('GOOGLE_CLIENT_ID', 'your_google_client_id');
-define('GOOGLE_CLIENT_SECRET', 'your_google_client_secret');
-define('GOOGLE_REDIRECT_URI', 'http://' . $_SERVER['HTTP_HOST'] . '/auth/google_callback.php');
+// Carica configurazione Google se esiste
+$google_config_file = __DIR__ . '/../config/google_config.php';
+if (file_exists($google_config_file)) {
+    require_once $google_config_file;
+} else {
+    // Configurazioni di default (dovrebbero essere sovrascritte)
+    if (!defined('GOOGLE_CLIENT_ID')) {
+        define('GOOGLE_CLIENT_ID', 'your_google_client_id');
+    }
+    if (!defined('GOOGLE_CLIENT_SECRET')) {
+        define('GOOGLE_CLIENT_SECRET', 'your_google_client_secret');
+    }
+    if (!defined('GOOGLE_REDIRECT_URI')) {
+        define('GOOGLE_REDIRECT_URI', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'] . "/auth/google_callback.php");
+    }
+    if (!defined('GOOGLE_SCOPES')) {
+        define('GOOGLE_SCOPES', 'openid email profile');
+    }
+}
 
 // Funzione per generare state token
 function generateStateToken() {
@@ -27,7 +42,7 @@ function getGoogleAuthUrl() {
     $params = [
         'client_id' => GOOGLE_CLIENT_ID,
         'redirect_uri' => GOOGLE_REDIRECT_URI,
-        'scope' => 'openid email profile',
+        'scope' => GOOGLE_SCOPES,
         'response_type' => 'code',
         'state' => $state,
         'access_type' => 'offline'
@@ -145,6 +160,62 @@ function generateUniqueUsername($base_name) {
             return $username;
         }
         $username = $base_username . $counter++;
+    }
+}
+
+// Funzione per creare o aggiornare utente da social login
+function createOrUpdateSocialUser($provider, $social_id, $email, $name, $picture = null) {
+    global $pdo;
+    
+    try {
+        // Determina il campo social_id in base al provider
+        $social_id_field = $provider . '_id';
+        
+        // Cerca utente esistente per social ID
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE {$social_id_field} = ?");
+        $stmt->execute([$social_id]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($user) {
+            // Utente esistente, aggiorna informazioni se necessario
+            if ($picture && $picture != $user['avatar_url']) {
+                $stmt = $pdo->prepare("UPDATE users SET avatar_url = ? WHERE id = ?");
+                $stmt->execute([$picture, $user['id']]);
+            }
+            return $user;
+        }
+        
+        // Cerca utente esistente per email
+        if ($email) {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($user) {
+                // Utente esistente con email, collega l'account social
+                $stmt = $pdo->prepare("UPDATE users SET {$social_id_field} = ?, avatar_url = ? WHERE id = ?");
+                $stmt->execute([$social_id, $picture, $user['id']]);
+                return $user;
+            }
+        }
+        
+        // Nuovo utente, crea account
+        $username = generateUniqueUsername($name);
+        $display_name = $name ?: $username;
+        $password_hash = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT); // Password casuale
+        
+        $stmt = $pdo->prepare("INSERT INTO users (username, email, password, display_name, avatar_url, {$social_id_field}) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$username, $email, $password_hash, $display_name, $picture, $social_id]);
+        
+        // Recupera l'utente appena creato
+        $user_id = $pdo->lastInsertId();
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$user_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+        
+    } catch (PDOException $e) {
+        error_log("Errore createOrUpdateSocialUser: " . $e->getMessage());
+        return false;
     }
 }
 ?>
