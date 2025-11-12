@@ -205,7 +205,13 @@ if (isset($_POST['action']) && $_POST['action'] === 'reorder_links') {
                             </div>
                         <?php else: ?>
                             <?php foreach ($links as $link): ?>
-                                <div class="link-item" data-link-id="<?php echo $link['id']; ?>" draggable="true">
+                                <div class="link-item"
+                                     data-link-id="<?php echo $link['id']; ?>"
+                                     data-link-title="<?php echo htmlspecialchars($link['title']); ?>"
+                                     data-link-url="<?php echo htmlspecialchars($link['url']); ?>"
+                                     data-link-icon="<?php echo htmlspecialchars($link['icon'] ?: 'fas fa-link'); ?>"
+                                     data-link-color="<?php echo htmlspecialchars($link['color'] ?: '#007bff'); ?>"
+                                     draggable="true">
                                     <div class="link-icon" style="background-color: <?php echo htmlspecialchars($link['color']); ?>">
                                         <i class="<?php echo htmlspecialchars($link['icon'] ?: 'fas fa-link'); ?>"></i>
                                     </div>
@@ -275,7 +281,13 @@ if (isset($_POST['action']) && $_POST['action'] === 'reorder_links') {
                                 </div>
                             <?php else: ?>
                                 <?php foreach ($links as $link): ?>
-                                    <div class="link-item" data-link-id="<?php echo $link['id']; ?>" draggable="true">
+                                    <div class="link-item"
+                                         data-link-id="<?php echo $link['id']; ?>"
+                                         data-link-title="<?php echo htmlspecialchars($link['title']); ?>"
+                                         data-link-url="<?php echo htmlspecialchars($link['url']); ?>"
+                                         data-link-icon="<?php echo htmlspecialchars($link['icon'] ?: 'fas fa-link'); ?>"
+                                         data-link-color="<?php echo htmlspecialchars($link['color'] ?: '#007bff'); ?>"
+                                         draggable="true">
                                         <div class="link-icon" style="background-color: <?php echo htmlspecialchars($link['color']); ?>">
                                             <i class="<?php echo htmlspecialchars($link['icon'] ?: 'fas fa-link'); ?>"></i>
                                         </div>

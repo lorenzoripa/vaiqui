@@ -38,34 +38,49 @@ document.addEventListener('click', function(e) {
 
 // Gestione form link
 function openLinkModal(linkId = null) {
-    const modal = document.getElementById('linkModal');
     const form = document.getElementById('linkForm');
     const title = document.getElementById('modalTitle');
-    
+    const actionInput = form.querySelector('input[name="action"]');
+    const linkIdInput = form.querySelector('input[name="link_id"]');
+    const titleInput = form.querySelector('input[name="title"]');
+    const urlInput = form.querySelector('input[name="url"]');
+    const iconInput = form.querySelector('input[name="icon"]');
+    const colorInput = form.querySelector('input[name="color"]');
+
+    form.action = 'dashboard.php';
+
     if (linkId) {
         // Modifica link esistente
         title.textContent = 'Modifica Link';
-        form.action = 'dashboard.php?action=update_link';
-        form.querySelector('input[name="link_id"]').value = linkId;
-        
-        // Carica i dati del link (dovresti implementare questa funzione)
-        loadLinkData(linkId);
+        actionInput.value = 'update_link';
+        linkIdInput.value = linkId;
+
+        const linkItem = document.querySelector(`.link-item[data-link-id="${linkId}"]`);
+        if (linkItem) {
+            titleInput.value = linkItem.dataset.linkTitle || '';
+            urlInput.value = linkItem.dataset.linkUrl || '';
+            iconInput.value = linkItem.dataset.linkIcon || 'fas fa-link';
+            colorInput.value = linkItem.dataset.linkColor || '#007bff';
+        }
     } else {
         // Nuovo link
-        title.textContent = 'Aggiungi Link';
-        form.action = 'dashboard.php?action=add_link';
-        form.querySelector('input[name="link_id"]').value = '';
         form.reset();
+        title.textContent = 'Aggiungi Link';
+        actionInput.value = 'add_link';
+        linkIdInput.value = '';
+
+        if (!iconInput.value) {
+            iconInput.value = 'fas fa-link';
+        }
+        if (!colorInput.value) {
+            colorInput.value = '#007bff';
+        }
     }
-    
+
     openModal('linkModal');
 }
 
-function loadLinkData(linkId) {
-    // Questa funzione dovrebbe caricare i dati del link dal server
-    // Per ora lasciamo vuota, implementerai con AJAX
-    console.log('Caricamento dati per link ID:', linkId);
-}
+// loadLinkData non è più necessario: i dati vengono letti dal DOM
 
 // Validazione form
 function validateForm(form) {
