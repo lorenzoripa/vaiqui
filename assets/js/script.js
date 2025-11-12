@@ -197,6 +197,22 @@ function saveLinkOrder() {
             action: 'reorder_links',
             order: order
         })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('HTTP error ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showNotification('Ordine dei link aggiornato', 'success');
+        } else {
+            showNotification(data.message || 'Errore durante il salvataggio dell\'ordine', 'error');
+        }
+    })
+    .catch(() => {
+        showNotification('Errore di connessione durante il salvataggio dell\'ordine', 'error');
     });
 }
 
@@ -248,10 +264,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Utility per copiare URL
-function copyToClipboard(text) {
+function copyToClipboard(text, buttonEl = null) {
     navigator.clipboard.writeText(text).then(function() {
         // Mostra un messaggio di conferma
-        const button = event.target;
+        const button = buttonEl || event.target;
         const originalText = button.textContent;
         button.textContent = 'Copiato!';
         button.style.background = '#28a745';
@@ -261,6 +277,69 @@ function copyToClipboard(text) {
             button.style.background = '';
         }, 2000);
     });
+}
+
+// Gestione link accorciati
+let currentQRPath = '';
+let currentQRUrl = '';
+
+function showQRModal(qrPath, title) {
+    currentQRPath = qrPath;
+    currentQRUrl = window.location.origin + '/' + qrPath.replace(/^\/+/, '');
+
+    const titleEl = document.getElementById('qrModalTitle');
+    const imageEl = document.getElementById('qrImage');
+
+    if (titleEl) {
+        titleEl.textContent = 'QR Code - ' + title;
+    }
+    if (imageEl) {
+        imageEl.src = qrPath;
+    }
+
+    openModal('qrModal');
+}
+
+function downloadQR() {
+    if (currentQRPath) {
+        const link = document.createElement('a');
+        link.href = currentQRPath;
+        link.download = 'qr-code.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+function copyQRUrl() {
+    if (currentQRUrl) {
+        navigator.clipboard.writeText(currentQRUrl).then(function() {
+            showNotification('URL QR Code copiato negli appunti!', 'success');
+        });
+    }
+}
+
+function deleteShortLink(linkId) {
+    if (confirm('Sei sicuro di voler eliminare questo link accorciato?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'dashboard.php';
+
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'delete_short_link';
+
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'short_link_id';
+        idInput.value = linkId;
+
+        form.appendChild(actionInput);
+        form.appendChild(idInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
 
 // Gestione tema

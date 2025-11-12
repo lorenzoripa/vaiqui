@@ -2,6 +2,7 @@
 session_start();
 require_once 'config/database.php';
 require_once 'includes/functions.php';
+require_once 'includes/qr_generator.php';
 
 // Controlla se l'utente è loggato
 if (!isset($_SESSION['user_id'])) {
@@ -12,6 +13,12 @@ if (!isset($_SESSION['user_id'])) {
 $user = getUser($_SESSION['user_id']);
 $links = getUserLinks($_SESSION['user_id']);
 $stats = getUserStats($_SESSION['user_id']);
+$short_links = getUserShortLinks($_SESSION['user_id']);
+$total_short_links = count($short_links);
+$total_short_clicks = 0;
+foreach ($short_links as $short_link) {
+    $total_short_clicks += $short_link['click_count'];
+}
 
 // Gestione delle azioni
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -79,24 +86,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = "Errore durante l'aggiornamento del profilo";
                 }
                 break;
+
+            case 'create_short_link':
+                $original_url = trim($_POST['original_url']);
+                $title = trim($_POST['short_title'] ?? '');
+                $description = trim($_POST['short_description'] ?? '');
+                $custom_code = trim($_POST['custom_code'] ?? '');
+
+                $result = createShortLink($_SESSION['user_id'], $original_url, $title, $description, $custom_code);
+                if ($result['success']) {
+                    $success = "Link accorciato creato con successo!";
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
+            case 'delete_short_link':
+                $short_link_id = (int)($_POST['short_link_id'] ?? 0);
+
+                if ($short_link_id && deleteShortLink($short_link_id, $_SESSION['user_id'])) {
+                    $success = "Link accorciato eliminato con successo!";
+                } else {
+                    $error = "Errore durante l'eliminazione del link accorciato";
+                }
+                break;
         }
         
         // Ricarica i dati dopo l'operazione
         $user = getUser($_SESSION['user_id']);
         $links = getUserLinks($_SESSION['user_id']);
         $stats = getUserStats($_SESSION['user_id']);
+        $short_links = getUserShortLinks($_SESSION['user_id']);
+        $total_short_links = count($short_links);
+        $total_short_clicks = 0;
+        foreach ($short_links as $short_link) {
+            $total_short_clicks += $short_link['click_count'];
+        }
     }
-}
-
-// Gestione riordinamento via AJAX
-if (isset($_POST['action']) && $_POST['action'] === 'reorder_links') {
-    $order = json_decode($_POST['order'], true);
-    if (reorderLinks($_SESSION['user_id'], $order)) {
-        echo json_encode(['success' => true]);
-    } else {
-        echo json_encode(['success' => false]);
-    }
-    exit();
 }
 ?>
 
@@ -315,20 +341,125 @@ if (isset($_POST['action']) && $_POST['action'] === 'reorder_links') {
                 <div id="short-links-tab" class="tab-content">
                     <div class="section-header">
                         <h2><i class="fas fa-compress"></i> Link Accorciati</h2>
-                        <a href="short-links.php" class="btn btn-primary">
-                            <i class="fas fa-external-link-alt"></i> Gestisci Link Accorciati
-                        </a>
+                        <div class="header-actions">
+                            <a href="short-links.php" class="btn btn-outline">
+                                <i class="fas fa-external-link-alt"></i> Vista completa
+                            </a>
+                        </div>
                     </div>
-                    <div class="info-card">
-                        <i class="fas fa-info-circle"></i>
-                        <h3>Link Accorciati</h3>
-                        <p>Crea link brevi e personalizzabili con statistiche dettagliate e QR code automatici.</p>
-                        <ul>
-                            <li>URL shortening professionale</li>
-                            <li>Codici personalizzati</li>
-                            <li>Analytics dettagliate</li>
-                            <li>QR Code automatici</li>
-                        </ul>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3><?php echo $total_short_links; ?></h3>
+                            <p>Link accorciati</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3><?php echo $total_short_clicks; ?></h3>
+                            <p>Click totali</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3><?php echo $total_short_links > 0 ? round($total_short_clicks / $total_short_links, 1) : 0; ?></h3>
+                            <p>Media click per link</p>
+                        </div>
+                    </div>
+
+                    <div class="links-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-plus"></i> Crea un nuovo link</h3>
+                        </div>
+                        <form method="POST" class="short-link-form">
+                            <input type="hidden" name="action" value="create_short_link">
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="short-original-url">URL originale</label>
+                                    <input type="url" id="short-original-url" name="original_url" required placeholder="https://esempio.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="custom_code">Codice personalizzato (opzionale)</label>
+                                    <input type="text" id="custom_code" name="custom_code" maxlength="20" placeholder="mio-link">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="short-title">Titolo (opzionale)</label>
+                                    <input type="text" id="short-title" name="short_title" placeholder="Titolo del link">
+                                </div>
+                                <div class="form-group">
+                                    <label for="short-description">Descrizione (opzionale)</label>
+                                    <input type="text" id="short-description" name="short_description" placeholder="Breve descrizione">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-link"></i> Crea link accorciato
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="links-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-list"></i> I tuoi link accorciati</h3>
+                        </div>
+
+                        <div class="short-links-list">
+                            <?php if (empty($short_links)): ?>
+                                <div class="empty-state">
+                                    <i class="fas fa-link"></i>
+                                    <h3>Nessun link accorciato</h3>
+                                    <p>Crea il tuo primo link accorciato per iniziare!</p>
+                                </div>
+                            <?php else: ?>
+                                <?php
+                                    $short_scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                                    $short_base_url = $short_scheme . '://' . $_SERVER['HTTP_HOST'] . '/short.php?code=';
+                                ?>
+                                <?php foreach ($short_links as $short_link): ?>
+                                    <?php $short_url = $short_base_url . urlencode($short_link['short_code']); ?>
+                                    <div class="short-link-item">
+                                        <div class="short-link-info">
+                                            <div class="short-link-title">
+                                                <?php echo htmlspecialchars($short_link['title'] ?: 'Senza titolo'); ?>
+                                            </div>
+                                            <div class="short-link-url">
+                                                <strong>Originale:</strong> <?php echo htmlspecialchars($short_link['original_url']); ?>
+                                            </div>
+                                            <div class="short-link-short">
+                                                <strong>Accorciato:</strong>
+                                                <a href="<?php echo $short_url; ?>" target="_blank" class="short-url"><?php echo $short_url; ?></a>
+                                                <button type="button" class="btn-copy" onclick="copyToClipboard('<?php echo $short_url; ?>', this)">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                            <?php if (!empty($short_link['description'])): ?>
+                                                <div class="short-link-description">
+                                                    <?php echo htmlspecialchars($short_link['description']); ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            <div class="short-link-stats">
+                                                <span><i class="fas fa-mouse-pointer"></i> <?php echo $short_link['click_count']; ?> click</span>
+                                                <span><i class="fas fa-calendar"></i> <?php echo date('d/m/Y', strtotime($short_link['created_at'])); ?></span>
+                                            </div>
+                                        </div>
+                                        <div class="short-link-actions">
+                                            <?php $qr_path = getShortLinkQRCode($_SESSION['user_id'], $short_link['short_code']); ?>
+                                            <?php if ($qr_path): ?>
+                                                <button type="button" class="btn-qr" onclick="showQRModal('<?php echo htmlspecialchars($qr_path); ?>', '<?php echo htmlspecialchars($short_link['title'] ?: 'Link'); ?>')">
+                                                    <i class="fas fa-qrcode"></i>
+                                                </button>
+                                            <?php endif; ?>
+                                            <button type="button" class="btn-stats" onclick="window.location.href='short-links.php';">
+                                                <i class="fas fa-chart-bar"></i>
+                                            </button>
+                                            <button type="button" class="btn-delete" onclick="deleteShortLink(<?php echo $short_link['id']; ?>)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
 
@@ -533,6 +664,29 @@ if (isset($_POST['action']) && $_POST['action'] === 'reorder_links') {
         </div>
     </div>
 
+    <!-- Modal QR Code -->
+    <div id="qrModal" class="modal">
+        <div class="modal-content qr-modal">
+            <div class="modal-header">
+                <h3 id="qrModalTitle">QR Code</h3>
+                <button class="close-modal" onclick="closeModal('qrModal')">&times;</button>
+            </div>
+            <div class="qr-modal-content">
+                <div class="qr-display">
+                    <img id="qrImage" src="" alt="QR Code" class="qr-large">
+                </div>
+                <div class="qr-actions">
+                    <button type="button" class="btn btn-primary" onclick="downloadQR()">
+                        <i class="fas fa-download"></i> Scarica QR Code
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="copyQRUrl()">
+                        <i class="fas fa-copy"></i> Copia URL
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
     <script src="assets/js/script.js"></script>
     <script>
         // Gestione tab del dashboard
