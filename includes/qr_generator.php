@@ -50,7 +50,14 @@ function generateShortLinkQRCode($short_code, $user_id) {
     global $pdo;
     
     // Ottieni l'URL completo del link accorciato
-    $base_url = 'http://' . $_SERVER['HTTP_HOST'] . '/s/' . $short_code;
+    $scheme = 'http';
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        $scheme = 'https';
+    } elseif (!empty($_SERVER['REQUEST_SCHEME'])) {
+        $scheme = $_SERVER['REQUEST_SCHEME'];
+    }
+
+    $base_url = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/short.php?code=' . urlencode($short_code);
     
     return generateLinkQRCode($base_url, $user_id, 'short_' . $short_code);
 }
