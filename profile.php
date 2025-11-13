@@ -181,6 +181,42 @@ if (isset($_GET['click']) && is_numeric($_GET['click'])) {
                 </div>
             <?php endif; ?>
             
+            <?php
+                $social_links = [];
+                $social_config = [
+                    'social_instagram' => ['label' => 'Instagram', 'icon' => 'fab fa-instagram'],
+                    'social_facebook'  => ['label' => 'Facebook', 'icon' => 'fab fa-facebook'],
+                    'social_tiktok'    => ['label' => 'TikTok', 'icon' => 'fab fa-tiktok'],
+                    'social_twitter'   => ['label' => 'Twitter', 'icon' => 'fab fa-x-twitter'],
+                    'social_linkedin'  => ['label' => 'LinkedIn', 'icon' => 'fab fa-linkedin'],
+                    'social_youtube'   => ['label' => 'YouTube', 'icon' => 'fab fa-youtube']
+                ];
+
+                foreach ($social_config as $key => $meta) {
+                    if (!empty($profile[$key])) {
+                        $social_links[] = [
+                            'url' => $profile[$key],
+                            'label' => $meta['label'],
+                            'icon' => $meta['icon']
+                        ];
+                    }
+                }
+            ?>
+
+            <?php if (!empty($social_links)): ?>
+                <div class="profile-social">
+                    <h3><i class="fas fa-share-alt"></i> Seguimi sui social</h3>
+                    <div class="social-links">
+                        <?php foreach ($social_links as $social): ?>
+                            <a href="<?php echo htmlspecialchars($social['url']); ?>" target="_blank" rel="noopener" class="social-link">
+                                <i class="<?php echo $social['icon']; ?>"></i>
+                                <span><?php echo htmlspecialchars($social['label']); ?></span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <?php if (isset($_GET['debug'])): ?>
                 <!-- Debug info -->
                 <div style="background: #f8f9fa; padding: 15px; margin: 20px; border-radius: 8px; font-family: monospace; font-size: 0.9rem;">
@@ -281,6 +317,50 @@ if (isset($_GET['click']) && is_numeric($_GET['click'])) {
             padding: 20px;
             color: #999;
             font-size: 0.9rem;
+        }
+
+        .profile-social {
+            margin: 30px 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            backdrop-filter: blur(6px);
+        }
+
+        .profile-social h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .social-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.2);
+            color: inherit;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .social-link i {
+            font-size: 1.2rem;
+        }
+
+        .social-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            color: inherit;
         }
         
         .fade-in-up {

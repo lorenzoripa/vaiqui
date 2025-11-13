@@ -1361,11 +1361,13 @@ body {
 }
 
 .setting-card {
-    background: white;
-    border: 1px solid #e1e5e9;
-    border-radius: 15px;
-    padding: 25px;
-    transition: all 0.3s ease;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 .setting-card:hover {
@@ -1400,6 +1402,16 @@ body {
 .setting-card .form-control:focus {
     outline: none;
     border-color: #667eea;
+}
+
+.setting-card .social-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.setting-card .form-group label i {
+    margin-right: 8px;
 }
 
 .btn-danger {

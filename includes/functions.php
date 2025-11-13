@@ -191,7 +191,7 @@ function getPublicProfile($username) {
     global $pdo;
     
     try {
-        $stmt = $pdo->prepare("SELECT id, username, display_name, bio, avatar, theme, address, show_map, latitude, longitude FROM users WHERE username = ?");
+        $stmt = $pdo->prepare("SELECT id, username, display_name, bio, avatar, theme, address, show_map, latitude, longitude, social_instagram, social_facebook, social_tiktok, social_twitter, social_linkedin, social_youtube FROM users WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         

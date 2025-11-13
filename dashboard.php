@@ -95,6 +95,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 break;
 
+            case 'update_social':
+                $social_fields = [
+                    'social_instagram',
+                    'social_facebook',
+                    'social_tiktok',
+                    'social_twitter',
+                    'social_linkedin',
+                    'social_youtube'
+                ];
+
+                $update_pairs = [];
+                $values = [];
+
+                foreach ($social_fields as $field) {
+                    $value = trim($_POST[$field] ?? '');
+                    $update_pairs[] = "$field = ?";
+                    $values[] = $value ?: null;
+                }
+
+                $values[] = $_SESSION['user_id'];
+
+                $query = "UPDATE users SET " . implode(', ', $update_pairs) . " WHERE id = ?";
+                $stmt = $pdo->prepare($query);
+
+                if ($stmt->execute($values)) {
+                    $success = "Social aggiornati con successo!";
+                } else {
+                    $error = "Errore durante l'aggiornamento dei social";
+                }
+                break;
+
             case 'create_short_link':
                 $original_url = trim($_POST['original_url']);
                 $title = trim($_POST['short_title'] ?? '');
@@ -620,6 +651,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <option value="minimal">Minimalista</option>
                                     <option value="colorful">Colorato</option>
                                 </select>
+                            </div>
+
+                            <div class="setting-card">
+                                <h3><i class="fas fa-share-alt"></i> Social</h3>
+                                <p>Aggiungi i tuoi profili social da mostrare sul profilo pubblico</p>
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="update_social">
+                                    <div class="form-group">
+                                        <label for="social_instagram"><i class="fab fa-instagram"></i> Instagram</label>
+                                        <input type="url" id="social_instagram" name="social_instagram" class="form-control"
+                                               value="<?php echo htmlspecialchars($user['social_instagram'] ?? ''); ?>"
+                                               placeholder="https://instagram.com/tuoprofilo">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="social_facebook"><i class="fab fa-facebook"></i> Facebook</label>
+                                        <input type="url" id="social_facebook" name="social_facebook" class="form-control"
+                                               value="<?php echo htmlspecialchars($user['social_facebook'] ?? ''); ?>"
+                                               placeholder="https://facebook.com/tuoprofilo">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="social_tiktok"><i class="fab fa-tiktok"></i> TikTok</label>
+                                        <input type="url" id="social_tiktok" name="social_tiktok" class="form-control"
+                                               value="<?php echo htmlspecialchars($user['social_tiktok'] ?? ''); ?>"
+                                               placeholder="https://www.tiktok.com/@tuoprofilo">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="social_twitter"><i class="fab fa-x-twitter"></i> Twitter / X</label>
+                                        <input type="url" id="social_twitter" name="social_twitter" class="form-control"
+                                               value="<?php echo htmlspecialchars($user['social_twitter'] ?? ''); ?>"
+                                               placeholder="https://twitter.com/tuoprofilo">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="social_linkedin"><i class="fab fa-linkedin"></i> LinkedIn</label>
+                                        <input type="url" id="social_linkedin" name="social_linkedin" class="form-control"
+                                               value="<?php echo htmlspecialchars($user['social_linkedin'] ?? ''); ?>"
+                                               placeholder="https://www.linkedin.com/in/tuoprofilo">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="social_youtube"><i class="fab fa-youtube"></i> YouTube</label>
+                                        <input type="url" id="social_youtube" name="social_youtube" class="form-control"
+                                               value="<?php echo htmlspecialchars($user['social_youtube'] ?? ''); ?>"
+                                               placeholder="https://www.youtube.com/@tuocanale">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Salva Social
+                                    </button>
+                                </form>
                             </div>
                             
                             <div class="setting-card">

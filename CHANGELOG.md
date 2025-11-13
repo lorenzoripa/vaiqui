@@ -12,11 +12,16 @@ Tutte le modifiche notevoli al progetto saranno documentate in questo file.
 - Profilo pubblico: i link con immagine vengono mostrati come card a tutta larghezza
 - Script SQL `add_link_image_url.sql` per aggiornare rapidamente il database
 
+#### 🌐 Icone Social nel Profilo
+- Nuova sezione nelle Impostazioni per inserire URL social (Instagram, Facebook, TikTok, Twitter/X, LinkedIn, YouTube)
+- I link social compaiono in fondo al profilo pubblico con icone dedicate
+- Aggiornato lo schema utenti con colonne `social_*`
+
 **File Modificati/Creati:**
-- `includes/functions.php` – supporto al campo `image_url` in `addLink`/`updateLink`
-- `dashboard.php`, `assets/js/script.js`, `assets/css/style.css` – gestione UI/UX link con immagine
-- `profile.php` – rendering card con immagine e overlay personalizzati
-- `config/database.example.php` – tabella `links` aggiornata con `image_url`
+- `includes/functions.php` – supporto al campo `image_url` in `addLink`/`updateLink` e recupero social
+- `dashboard.php`, `assets/js/script.js`, `assets/css/style.css` – gestione UI/UX link con immagine e form social
+- `profile.php` – rendering card con immagine, overlay e blocco social
+- `config/database.example.php`, `database_update.sql` – tabella `links` e `users` aggiornate (`image_url`, `social_*`)
 - `add_link_image_url.sql` – script ALTER TABLE
 
 ---
