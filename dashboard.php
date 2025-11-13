@@ -416,7 +416,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     $short_base_url = $short_scheme . '://' . $_SERVER['HTTP_HOST'] . '/short.php?code=';
                                 ?>
                                 <?php foreach ($short_links as $short_link): ?>
-                                    <?php $short_url = $short_base_url . urlencode($short_link['short_code']); ?>
+                                    <?php 
+                                        $short_url = $short_base_url . urlencode($short_link['short_code']);
+                                        $qr_raw = getShortLinkQRCode($_SESSION['user_id'], $short_link['short_code']);
+                                        $scheme_full = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                                        $qr_display = '';
+                                        if ($qr_raw) {
+                                            if (preg_match('/^https?:\/\//', $qr_raw)) {
+                                                $qr_display = $qr_raw;
+                                            } else {
+                                                $qr_display = $scheme_full . '://' . $_SERVER['HTTP_HOST'] . '/' . ltrim($qr_raw, '/');
+                                            }
+                                        }
+                                    ?>
                                     <div class="short-link-item">
                                         <div class="short-link-info">
                                             <div class="short-link-title">
@@ -441,11 +453,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 <span><i class="fas fa-mouse-pointer"></i> <?php echo $short_link['click_count']; ?> click</span>
                                                 <span><i class="fas fa-calendar"></i> <?php echo date('d/m/Y', strtotime($short_link['created_at'])); ?></span>
                                             </div>
+                                            <?php if ($qr_display): ?>
+                                                <div class="short-link-qr-preview">
+                                                    <img src="<?php echo htmlspecialchars($qr_display); ?>" alt="QR Code" class="qr-thumbnail">
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                         <div class="short-link-actions">
-                                            <?php $qr_path = getShortLinkQRCode($_SESSION['user_id'], $short_link['short_code']); ?>
-                                            <?php if ($qr_path): ?>
-                                                <button type="button" class="btn-qr" onclick="showQRModal('<?php echo htmlspecialchars($qr_path); ?>', '<?php echo htmlspecialchars($short_link['title'] ?: 'Link'); ?>')">
+                                            <?php if ($qr_display): ?>
+                                                <button type="button" class="btn-qr" onclick="showQRModal('<?php echo htmlspecialchars($qr_display); ?>', '<?php echo htmlspecialchars($short_link['title'] ?: 'Link'); ?>')">
                                                     <i class="fas fa-qrcode"></i>
                                                 </button>
                                             <?php endif; ?>

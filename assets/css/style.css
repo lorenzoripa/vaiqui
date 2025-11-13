@@ -1691,3 +1691,24 @@ input[type="range"]::-moz-range-thumb {
         width: 143%;
     }
 }
+
+.short-links-list .short-link-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.short-link-qr-preview {
+    margin-top: 10px;
+}
+
+.short-link-qr-preview .qr-thumbnail {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    padding: 8px;
+}
