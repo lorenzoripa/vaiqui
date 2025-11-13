@@ -10,6 +10,61 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// === Configurazione upload immagini link ===
+const LINK_IMAGE_DIR = __DIR__ . '/uploads/link_images/';
+const LINK_IMAGE_BASE_PATH = 'uploads/link_images/';
+const LINK_IMAGE_MAX_SIZE = 2 * 1024 * 1024; // 2MB
+const LINK_IMAGE_ALLOWED_MIME = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
+
+if (!is_dir(LINK_IMAGE_DIR)) {
+    @mkdir(LINK_IMAGE_DIR, 0755, true);
+}
+
+function isLocalLinkImage(string $path = null): bool {
+    if (!$path) {
+        return false;
+    }
+    return strpos($path, LINK_IMAGE_BASE_PATH) === 0;
+}
+
+function deleteLinkImageIfLocal(?string $path): void {
+    if ($path && isLocalLinkImage($path)) {
+        $abs = LINK_IMAGE_DIR . basename($path);
+        if (is_file($abs)) {
+            @unlink($abs);
+        }
+    }
+}
+
+function handleLinkImageUpload(array $file, int $userId): array {
+    if (empty($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        return ['path' => null, 'error' => null];
+    }
+
+    if (($file['size'] ?? 0) > LINK_IMAGE_MAX_SIZE) {
+        return ['path' => null, 'error' => 'Immagine troppo grande (max 2MB)'];
+    }
+
+    $tmpName = $file['tmp_name'];
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = finfo_file($finfo, $tmpName) ?: '';
+    finfo_close($finfo);
+
+    if (!isset(LINK_IMAGE_ALLOWED_MIME[$mime])) {
+        return ['path' => null, 'error' => 'Formato immagine non valido (solo JPG o PNG)'];
+    }
+
+    $extension = LINK_IMAGE_ALLOWED_MIME[$mime];
+    $filename = 'link_' . $userId . '_' . uniqid('', true) . '.' . $extension;
+    $destination = LINK_IMAGE_DIR . $filename;
+
+    if (!move_uploaded_file($tmpName, $destination)) {
+        return ['path' => null, 'error' => 'Errore durante il salvataggio dell\'immagine'];
+    }
+
+    return ['path' => LINK_IMAGE_BASE_PATH . $filename, 'error' => null];
+}
+
 $user = getUser($_SESSION['user_id']);
 $links = getUserLinks($_SESSION['user_id']);
 $stats = getUserStats($_SESSION['user_id']);
@@ -29,14 +84,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $url = trim($_POST['url']);
                 $icon = trim($_POST['icon']);
                 $color = $_POST['color'];
-                $image_url = trim($_POST['image_url'] ?? '');
-                if ($image_url === '') {
-                    $image_url = null;
+                $image_url_input = trim($_POST['image_url'] ?? '');
+                $image_url = $image_url_input !== '' ? $image_url_input : null;
+
+                $uploadResult = handleLinkImageUpload($_FILES['image_file'] ?? [], $_SESSION['user_id']);
+                if ($uploadResult['error']) {
+                    $error = $uploadResult['error'];
+                    break;
+                }
+                if ($uploadResult['path']) {
+                    $image_url = $uploadResult['path'];
                 }
                 
                 if (addLink($_SESSION['user_id'], $title, $url, $icon, $color, $image_url)) {
                     $success = "Link aggiunto con successo!";
                 } else {
+                    if ($uploadResult['path']) {
+                        deleteLinkImageIfLocal($uploadResult['path']);
+                    }
                     $error = "Errore durante l'aggiunta del link";
                 }
                 break;
@@ -47,22 +112,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $url = trim($_POST['url']);
                 $icon = trim($_POST['icon']);
                 $color = $_POST['color'];
-                $image_url = trim($_POST['image_url'] ?? '');
-                if ($image_url === '') {
-                    $image_url = null;
+                $image_url_input = trim($_POST['image_url'] ?? '');
+                $remove_image_requested = ($_POST['remove_image'] ?? '0') === '1';
+
+                $stmt = $pdo->prepare("SELECT image_url FROM links WHERE id = ? AND user_id = ?");
+                $stmt->execute([$link_id, $_SESSION['user_id']]);
+                $currentLink = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$currentLink) {
+                    $error = "Link non trovato";
+                    break;
                 }
-                
-                if (updateLink($link_id, $_SESSION['user_id'], $title, $url, $icon, $color, $image_url)) {
+
+                $currentImage = $currentLink['image_url'] ?? null;
+                $finalImageUrl = $currentImage;
+
+                $uploadResult = handleLinkImageUpload($_FILES['image_file'] ?? [], $_SESSION['user_id']);
+                if ($uploadResult['error']) {
+                    $error = $uploadResult['error'];
+                    break;
+                }
+
+                if ($uploadResult['path']) {
+                    if ($currentImage && $uploadResult['path'] !== $currentImage) {
+                        deleteLinkImageIfLocal($currentImage);
+                    }
+                    $finalImageUrl = $uploadResult['path'];
+                    $remove_image_requested = false;
+                } else {
+                    if ($image_url_input !== '') {
+                        if ($currentImage && $image_url_input !== $currentImage) {
+                            deleteLinkImageIfLocal($currentImage);
+                        }
+                        $finalImageUrl = $image_url_input;
+                        $remove_image_requested = false;
+                    } elseif ($remove_image_requested) {
+                        deleteLinkImageIfLocal($currentImage);
+                        $finalImageUrl = null;
+                    }
+                }
+
+                if (updateLink($link_id, $_SESSION['user_id'], $title, $url, $icon, $color, $finalImageUrl)) {
                     $success = "Link aggiornato con successo!";
                 } else {
+                    if ($uploadResult['path']) {
+                        deleteLinkImageIfLocal($uploadResult['path']);
+                    }
                     $error = "Errore durante l'aggiornamento del link";
                 }
                 break;
                 
             case 'delete_link':
                 $link_id = $_POST['link_id'];
+                $stmt = $pdo->prepare("SELECT image_url FROM links WHERE id = ? AND user_id = ?");
+                $stmt->execute([$link_id, $_SESSION['user_id']]);
+                $linkData = $stmt->fetch(PDO::FETCH_ASSOC);
                 
                 if (deleteLink($link_id, $_SESSION['user_id'])) {
+                    if ($linkData && !empty($linkData['image_url'])) {
+                        deleteLinkImageIfLocal($linkData['image_url']);
+                    }
                     $success = "Link eliminato con successo!";
                 } else {
                     $error = "Errore durante l'eliminazione del link";
@@ -737,7 +846,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h3 id="modalTitle">Aggiungi Link</h3>
                 <button class="close-modal" onclick="closeModal('linkModal')">&times;</button>
             </div>
-            <form id="linkForm" method="POST">
+            <form id="linkForm" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="add_link">
                 <input type="hidden" name="link_id" value="">
                 
@@ -772,6 +881,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                            placeholder="https://esempio.com/immagine.jpg">
                     <small class="form-hint">Se impostata, il link viene mostrato come card con immagine anche nel profilo pubblico.</small>
                 </div>
+
+                <div class="form-group">
+                    <label for="image_file">Oppure carica immagine (JPG o PNG, max 2MB)</label>
+                    <input type="file" id="image_file" name="image_file" accept="image/jpeg,image/png">
+                    <div class="image-upload-actions">
+                        <div class="image-preview hidden" id="imagePreviewWrapper">
+                            <img id="imagePreview" src="" alt="Anteprima immagine">
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm hidden" id="removeImageButton">Rimuovi immagine</button>
+                    </div>
+                </div>
+
+                <input type="hidden" name="remove_image" id="remove_image" value="0">
                 
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('linkModal')">

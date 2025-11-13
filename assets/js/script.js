@@ -38,51 +38,109 @@ document.addEventListener('click', function(e) {
 
 // Gestione form link
 function openLinkModal(linkId = null) {
-    const form = document.getElementById('linkForm');
-    const title = document.getElementById('modalTitle');
-    const actionInput = form.querySelector('input[name="action"]');
-    const linkIdInput = form.querySelector('input[name="link_id"]');
-    const titleInput = form.querySelector('input[name="title"]');
-    const urlInput = form.querySelector('input[name="url"]');
-    const iconInput = form.querySelector('input[name="icon"]');
-    const colorInput = form.querySelector('input[name="color"]');
-    const imageInput = form.querySelector('input[name="image_url"]');
+     const form = document.getElementById('linkForm');
+     const title = document.getElementById('modalTitle');
+     const actionInput = form.querySelector('input[name="action"]');
+     const linkIdInput = form.querySelector('input[name="link_id"]');
+     const titleInput = form.querySelector('input[name="title"]');
+     const urlInput = form.querySelector('input[name="url"]');
+     const iconInput = form.querySelector('input[name="icon"]');
+     const colorInput = form.querySelector('input[name="color"]');
+     const imageInput = form.querySelector('input[name="image_url"]');
+    const fileInput = form.querySelector('input[name="image_file"]');
+    const removeImageInput = form.querySelector('input[name="remove_image"]');
+    const removeImageButton = document.getElementById('removeImageButton');
 
-    form.action = 'dashboard.php';
+    const setPreview = (src) => {
+        updateLinkImagePreview(src);
+        if (removeImageInput) {
+            removeImageInput.value = src ? '0' : removeImageInput.value;
+        }
+    };
+ 
+     form.action = 'dashboard.php';
+ 
+     if (linkId) {
+         // Modifica link esistente
+         title.textContent = 'Modifica Link';
+         actionInput.value = 'update_link';
+         linkIdInput.value = linkId;
+ 
+         const linkItem = document.querySelector(`.link-item[data-link-id="${linkId}"]`);
+         if (linkItem) {
+             titleInput.value = linkItem.dataset.linkTitle || '';
+             urlInput.value = linkItem.dataset.linkUrl || '';
+             iconInput.value = linkItem.dataset.linkIcon || 'fas fa-link';
+             colorInput.value = linkItem.dataset.linkColor || '#007bff';
+             imageInput.value = linkItem.dataset.linkImage || '';
+            if (linkItem.dataset.linkImage) {
+                setPreview(linkItem.dataset.linkImage);
+            } else {
+                updateLinkImagePreview('');
+            }
+         }
+        if (removeImageInput) {
+            removeImageInput.value = '0';
+        }
+        if (fileInput) {
+            fileInput.value = '';
+        }
+     } else {
+         // Nuovo link
+         form.reset();
+         title.textContent = 'Aggiungi Link';
+         actionInput.value = 'add_link';
+         linkIdInput.value = '';
+ 
+         if (!iconInput.value) {
+             iconInput.value = 'fas fa-link';
+         }
+         if (!colorInput.value) {
+             colorInput.value = '#007bff';
+         }
+         if (imageInput) {
+             imageInput.value = '';
+         }
+        if (fileInput) {
+            fileInput.value = '';
+        }
+        updateLinkImagePreview('');
+        if (removeImageInput) {
+            removeImageInput.value = '0';
+        }
+     }
+ 
+     openModal('linkModal');
+ }
 
-    if (linkId) {
-        // Modifica link esistente
-        title.textContent = 'Modifica Link';
-        actionInput.value = 'update_link';
-        linkIdInput.value = linkId;
+const imagePreviewWrapperEl = document.getElementById('imagePreviewWrapper');
+const imagePreviewImgEl = document.getElementById('imagePreview');
+const removeImageBtnEl = document.getElementById('removeImageButton');
 
-        const linkItem = document.querySelector(`.link-item[data-link-id="${linkId}"]`);
-        if (linkItem) {
-            titleInput.value = linkItem.dataset.linkTitle || '';
-            urlInput.value = linkItem.dataset.linkUrl || '';
-            iconInput.value = linkItem.dataset.linkIcon || 'fas fa-link';
-            colorInput.value = linkItem.dataset.linkColor || '#007bff';
-            imageInput.value = linkItem.dataset.linkImage || '';
-        }
-    } else {
-        // Nuovo link
-        form.reset();
-        title.textContent = 'Aggiungi Link';
-        actionInput.value = 'add_link';
-        linkIdInput.value = '';
-
-        if (!iconInput.value) {
-            iconInput.value = 'fas fa-link';
-        }
-        if (!colorInput.value) {
-            colorInput.value = '#007bff';
-        }
-        if (imageInput) {
-            imageInput.value = '';
-        }
+function resolveLinkImageSrc(src) {
+    if (!src) return '';
+    if (/^data:/i.test(src)) {
+        return src;
     }
+    if (/^https?:\/\//i.test(src)) {
+        return src;
+    }
+    return window.location.origin + '/' + src.replace(/^\/+/,'');
+}
 
-    openModal('linkModal');
+function updateLinkImagePreview(src) {
+    if (!imagePreviewWrapperEl || !imagePreviewImgEl || !removeImageBtnEl) {
+        return;
+    }
+    if (src) {
+        imagePreviewImgEl.src = resolveLinkImageSrc(src);
+        imagePreviewWrapperEl.classList.remove('hidden');
+        removeImageBtnEl.classList.remove('hidden');
+    } else {
+        imagePreviewImgEl.src = '';
+        imagePreviewWrapperEl.classList.add('hidden');
+        removeImageBtnEl.classList.add('hidden');
+    }
 }
 
 // loadLinkData non è più necessario: i dati vengono letti dal DOM
@@ -260,6 +318,78 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    const linkForm = document.getElementById('linkForm');
+    if (linkForm) {
+        const fileInput = linkForm.querySelector('input[name="image_file"]');
+        const imageUrlInput = linkForm.querySelector('input[name="image_url"]');
+        const removeImageInput = linkForm.querySelector('input[name="remove_image"]');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (!this.files || !this.files[0]) {
+                    if (!imageUrlInput || !imageUrlInput.value.trim()) {
+                        updateLinkImagePreview('');
+                    }
+                    return;
+                }
+
+                const file = this.files[0];
+                const allowedTypes = ['image/jpeg', 'image/png'];
+
+                if (!allowedTypes.includes(file.type)) {
+                    showNotification('Formato immagine non valido (solo JPG o PNG)', 'error');
+                    this.value = '';
+                    return;
+                }
+
+                if (file.size > 2 * 1024 * 1024) {
+                    showNotification('Immagine troppo grande (max 2MB)', 'error');
+                    this.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    updateLinkImagePreview(e.target.result);
+                };
+                reader.readAsDataURL(file);
+
+                if (removeImageInput) {
+                    removeImageInput.value = '0';
+                }
+            });
+        }
+
+        if (removeImageBtnEl) {
+            removeImageBtnEl.addEventListener('click', function() {
+                if (imageUrlInput) {
+                    imageUrlInput.value = '';
+                }
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+                updateLinkImagePreview('');
+                if (removeImageInput) {
+                    removeImageInput.value = '1';
+                }
+            });
+        }
+
+        if (imageUrlInput) {
+            imageUrlInput.addEventListener('change', function() {
+                const value = this.value.trim();
+                if (value) {
+                    updateLinkImagePreview(value);
+                    if (removeImageInput) {
+                        removeImageInput.value = '0';
+                    }
+                } else if (!fileInput || !fileInput.files.length) {
+                    updateLinkImagePreview('');
+                }
+            });
+        }
+    }
     
     // Auto-focus sul primo campo vuoto
     const firstEmptyInput = document.querySelector('input:not([value]):not([type="hidden"])');
