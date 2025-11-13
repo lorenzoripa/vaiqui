@@ -27,21 +27,25 @@ function saveQRCode($data, $filename, $size = 200) {
 
 // Funzione per generare QR code per un link
 function generateLinkQRCode($link_url, $user_id, $link_id = null) {
-    $qr_dir = "assets/qr_codes/";
-    
+    $root_dir = realpath(__DIR__ . '/..');
+    $qr_dir_abs = $root_dir . '/assets/qr_codes/';
+    $qr_dir_public = 'assets/qr_codes/';
+
     // Crea la directory se non esiste
-    if (!file_exists($qr_dir)) {
-        mkdir($qr_dir, 0755, true);
+    if (!is_dir($qr_dir_abs)) {
+        @mkdir($qr_dir_abs, 0755, true);
     }
-    
+
     // Nome file unico
-    $filename = $qr_dir . "qr_" . $user_id . "_" . ($link_id ?: time()) . ".png";
-    
+    $file_basename = 'qr_' . $user_id . '_' . ($link_id ?: time()) . '.png';
+    $filename_abs = $qr_dir_abs . $file_basename;
+    $filename_public = $qr_dir_public . $file_basename;
+
     // Genera e salva il QR code
-    if (saveQRCode($link_url, $filename)) {
-        return $filename;
+    if (saveQRCode($link_url, $filename_abs)) {
+        return $filename_public;
     }
-    
+
     return false;
 }
 
@@ -100,16 +104,21 @@ function getLinkQRCode($user_id, $link_id) {
 
 // Funzione per ottenere il QR code di un link accorciato
 function getShortLinkQRCode($user_id, $short_code) {
-    $qr_path = "assets/qr_codes/qr_" . $user_id . "_short_" . $short_code . ".png";
+    $root_dir = realpath(__DIR__ . '/..');
+    $qr_rel = 'assets/qr_codes/qr_' . $user_id . '_short_' . $short_code . '.png';
+    $qr_abs = $root_dir . '/' . $qr_rel;
 
-    if (file_exists($qr_path)) {
-        return $qr_path;
+    if (file_exists($qr_abs)) {
+        return $qr_rel;
     }
 
     $generated = generateShortLinkQRCode($short_code, $user_id);
 
-    if ($generated && file_exists($generated)) {
-        return $generated;
+    if ($generated) {
+        $generated_abs = $root_dir . '/' . ltrim($generated, '/');
+        if (file_exists($generated_abs)) {
+            return ltrim($generated, '/');
+        }
     }
 
     return $generated; // potrebbe essere un URL remoto
