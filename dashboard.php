@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id'])) {
 // === Configurazione upload immagini link ===
 const LINK_IMAGE_DIR = __DIR__ . '/uploads/link_images/';
 const LINK_IMAGE_BASE_PATH = 'uploads/link_images/';
-const LINK_IMAGE_MAX_SIZE = 2 * 1024 * 1024; // 2MB
+const LINK_IMAGE_MAX_SIZE = 500 * 1024; // 500KB
 const LINK_IMAGE_ALLOWED_MIME = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
 
 if (!is_dir(LINK_IMAGE_DIR)) {
@@ -42,7 +42,7 @@ function handleLinkImageUpload(array $file, int $userId): array {
     }
 
     if (($file['size'] ?? 0) > LINK_IMAGE_MAX_SIZE) {
-        return ['path' => null, 'error' => 'Immagine troppo grande (max 2MB)'];
+        return ['path' => null, 'error' => 'Immagine troppo grande (max 500KB)'];
     }
 
     $tmpName = $file['tmp_name'];
@@ -883,7 +883,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="form-group">
-                    <label for="image_file">Oppure carica immagine (JPG o PNG, max 2MB)</label>
+                    <label for="image_file">Oppure carica immagine (JPG o PNG, max 500KB)</label>
                     <input type="file" id="image_file" name="image_file" accept="image/jpeg,image/png">
                     <div class="image-upload-actions">
                         <div class="image-preview hidden" id="imagePreviewWrapper">

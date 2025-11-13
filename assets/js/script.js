@@ -343,8 +343,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
-                if (file.size > 2 * 1024 * 1024) {
-                    showNotification('Immagine troppo grande (max 2MB)', 'error');
+                if (file.size > 500 * 1024) {
+                    showNotification('Immagine troppo grande (max 500KB)', 'error');
                     this.value = '';
                     return;
                 }
