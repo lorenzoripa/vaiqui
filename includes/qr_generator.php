@@ -12,16 +12,40 @@ function generateQRCode($data, $size = 200) {
 function saveQRCode($data, $filename, $size = 200) {
     $qr_url = generateQRCode($data, $size);
     
-    // Scarica l'immagine
-    $image_data = file_get_contents($qr_url);
-    
+    $image_data = false;
+
+    // Prova con cURL se disponibile
+    if (function_exists('curl_init')) {
+        $ch = curl_init($qr_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'VaiQui QR Generator/1.0');
+        $image_data = curl_exec($ch);
+        if (curl_errno($ch)) {
+            error_log('QR cURL error: ' . curl_error($ch));
+        }
+        curl_close($ch);
+    }
+
+    // Fallback a file_get_contents se cURL non disponibile o fallisce
     if ($image_data === false) {
+        $image_data = @file_get_contents($qr_url);
+    }
+
+    if ($image_data === false) {
+        error_log('QR download fallito per URL: ' . $qr_url);
         return false;
     }
-    
+
     // Salva l'immagine
-    $result = file_put_contents($filename, $image_data);
+    $result = @file_put_contents($filename, $image_data);
     
+    if ($result === false) {
+        error_log('QR salvataggio fallito per file: ' . $filename);
+    }
+
     return $result !== false;
 }
 
