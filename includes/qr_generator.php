@@ -4,7 +4,7 @@
 
 function generateQRCode($data, $size = 200) {
     $encoded_data = urlencode($data);
-    $qr_url = "https://chart.googleapis.com/chart?chs={$size}x{$size}&cht=qr&chl={$encoded_data}";
+    $qr_url = "https://api.qrserver.com/v1/create-qr-code/?size={$size}x{$size}&data={$encoded_data}&format=png";
     return $qr_url;
 }
 
@@ -22,6 +22,7 @@ function saveQRCode($data, $filename, $size = 200) {
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_USERAGENT, 'VaiQui QR Generator/1.0');
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $image_data = curl_exec($ch);
         if (curl_errno($ch)) {
             error_log('QR cURL error: ' . curl_error($ch));
@@ -36,6 +37,11 @@ function saveQRCode($data, $filename, $size = 200) {
 
     if ($image_data === false) {
         error_log('QR download fallito per URL: ' . $qr_url);
+        return false;
+    }
+
+    if (strlen($image_data) < 10) {
+        error_log('QR download restituisce contenuto troppo corto per URL: ' . $qr_url);
         return false;
     }
 
