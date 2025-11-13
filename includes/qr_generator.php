@@ -59,7 +59,14 @@ function generateShortLinkQRCode($short_code, $user_id) {
 
     $base_url = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/short.php?code=' . urlencode($short_code);
     
-    return generateLinkQRCode($base_url, $user_id, 'short_' . $short_code);
+    $saved_path = generateLinkQRCode($base_url, $user_id, 'short_' . $short_code);
+
+    if ($saved_path) {
+        return $saved_path;
+    }
+
+    // Fallback: restituisci direttamente l'URL del QR generato da Google Charts
+    return generateQRCode($base_url);
 }
 
 // Funzione per ottenere il QR code di un link esistente
@@ -94,12 +101,18 @@ function getLinkQRCode($user_id, $link_id) {
 // Funzione per ottenere il QR code di un link accorciato
 function getShortLinkQRCode($user_id, $short_code) {
     $qr_path = "assets/qr_codes/qr_" . $user_id . "_short_" . $short_code . ".png";
-    
+
     if (file_exists($qr_path)) {
         return $qr_path;
     }
-    
-    return generateShortLinkQRCode($short_code, $user_id);
+
+    $generated = generateShortLinkQRCode($short_code, $user_id);
+
+    if ($generated && file_exists($generated)) {
+        return $generated;
+    }
+
+    return $generated; // potrebbe essere un URL remoto
 }
 
 // Funzione per eliminare QR code
