@@ -2,6 +2,25 @@
 
 Tutte le modifiche notevoli al progetto saranno documentate in questo file.
 
+## [Aggiornamento] - 2025-11-13
+
+### ✨ Nuove Funzionalità
+
+#### 🖼️ Card Link con Immagine
+- Ogni link può avere un'anteprima immagine (URL opzionale)
+- Dashboard: nuova miniatura nell'elenco + campo dedicato nel modal
+- Profilo pubblico: i link con immagine vengono mostrati come card a tutta larghezza
+- Script SQL `add_link_image_url.sql` per aggiornare rapidamente il database
+
+**File Modificati/Creati:**
+- `includes/functions.php` – supporto al campo `image_url` in `addLink`/`updateLink`
+- `dashboard.php`, `assets/js/script.js`, `assets/css/style.css` – gestione UI/UX link con immagine
+- `profile.php` – rendering card con immagine e overlay personalizzati
+- `config/database.example.php` – tabella `links` aggiornata con `image_url`
+- `add_link_image_url.sql` – script ALTER TABLE
+
+---
+
 ## [Aggiornamento] - 2025-10-25
 
 ### ✨ Nuove Funzionalità

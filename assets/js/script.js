@@ -46,6 +46,7 @@ function openLinkModal(linkId = null) {
     const urlInput = form.querySelector('input[name="url"]');
     const iconInput = form.querySelector('input[name="icon"]');
     const colorInput = form.querySelector('input[name="color"]');
+    const imageInput = form.querySelector('input[name="image_url"]');
 
     form.action = 'dashboard.php';
 
@@ -61,6 +62,7 @@ function openLinkModal(linkId = null) {
             urlInput.value = linkItem.dataset.linkUrl || '';
             iconInput.value = linkItem.dataset.linkIcon || 'fas fa-link';
             colorInput.value = linkItem.dataset.linkColor || '#007bff';
+            imageInput.value = linkItem.dataset.linkImage || '';
         }
     } else {
         // Nuovo link
@@ -74,6 +76,9 @@ function openLinkModal(linkId = null) {
         }
         if (!colorInput.value) {
             colorInput.value = '#007bff';
+        }
+        if (imageInput) {
+            imageInput.value = '';
         }
     }
 

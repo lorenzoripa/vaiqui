@@ -71,7 +71,7 @@ function getUserLinks($user_id) {
 }
 
 // Funzione per aggiungere un nuovo link
-function addLink($user_id, $title, $url, $icon = '', $color = '#007bff') {
+function addLink($user_id, $title, $url, $icon = '', $color = '#007bff', $image_url = null) {
     global $pdo;
     
     try {
@@ -81,8 +81,8 @@ function addLink($user_id, $title, $url, $icon = '', $color = '#007bff') {
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         $position = ($result['max_pos'] ?? 0) + 1;
         
-        $stmt = $pdo->prepare("INSERT INTO links (user_id, title, url, icon, color, position) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$user_id, $title, $url, $icon, $color, $position]);
+        $stmt = $pdo->prepare("INSERT INTO links (user_id, title, url, icon, color, image_url, position) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$user_id, $title, $url, $icon, $color, $image_url ?: null, $position]);
         return true;
     } catch (PDOException $e) {
         return false;
@@ -90,12 +90,12 @@ function addLink($user_id, $title, $url, $icon = '', $color = '#007bff') {
 }
 
 // Funzione per aggiornare un link
-function updateLink($link_id, $user_id, $title, $url, $icon = '', $color = '#007bff') {
+function updateLink($link_id, $user_id, $title, $url, $icon = '', $color = '#007bff', $image_url = null) {
     global $pdo;
     
     try {
-        $stmt = $pdo->prepare("UPDATE links SET title = ?, url = ?, icon = ?, color = ? WHERE id = ? AND user_id = ?");
-        $stmt->execute([$title, $url, $icon, $color, $link_id, $user_id]);
+        $stmt = $pdo->prepare("UPDATE links SET title = ?, url = ?, icon = ?, color = ?, image_url = ? WHERE id = ? AND user_id = ?");
+        $stmt->execute([$title, $url, $icon, $color, $image_url ?: null, $link_id, $user_id]);
         return true;
     } catch (PDOException $e) {
         return false;

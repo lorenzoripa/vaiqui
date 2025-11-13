@@ -68,6 +68,7 @@ function createTables($pdo) {
         url TEXT NOT NULL,
         icon VARCHAR(100),
         color VARCHAR(7) DEFAULT '#007bff',
+        image_url VARCHAR(500) DEFAULT NULL,
         position INT DEFAULT 0,
         is_active BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

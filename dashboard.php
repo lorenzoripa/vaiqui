@@ -29,8 +29,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $url = trim($_POST['url']);
                 $icon = trim($_POST['icon']);
                 $color = $_POST['color'];
+                $image_url = trim($_POST['image_url'] ?? '');
+                if ($image_url === '') {
+                    $image_url = null;
+                }
                 
-                if (addLink($_SESSION['user_id'], $title, $url, $icon, $color)) {
+                if (addLink($_SESSION['user_id'], $title, $url, $icon, $color, $image_url)) {
                     $success = "Link aggiunto con successo!";
                 } else {
                     $error = "Errore durante l'aggiunta del link";
@@ -43,8 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $url = trim($_POST['url']);
                 $icon = trim($_POST['icon']);
                 $color = $_POST['color'];
+                $image_url = trim($_POST['image_url'] ?? '');
+                if ($image_url === '') {
+                    $image_url = null;
+                }
                 
-                if (updateLink($link_id, $_SESSION['user_id'], $title, $url, $icon, $color)) {
+                if (updateLink($link_id, $_SESSION['user_id'], $title, $url, $icon, $color, $image_url)) {
                     $success = "Link aggiornato con successo!";
                 } else {
                     $error = "Errore durante l'aggiornamento del link";
@@ -237,11 +245,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                      data-link-url="<?php echo htmlspecialchars($link['url']); ?>"
                                      data-link-icon="<?php echo htmlspecialchars($link['icon'] ?: 'fas fa-link'); ?>"
                                      data-link-color="<?php echo htmlspecialchars($link['color'] ?: '#007bff'); ?>"
+                                     data-link-image="<?php echo htmlspecialchars($link['image_url'] ?? ''); ?>"
                                      draggable="true">
                                     <div class="link-icon" style="background-color: <?php echo htmlspecialchars($link['color']); ?>">
                                         <i class="<?php echo htmlspecialchars($link['icon'] ?: 'fas fa-link'); ?>"></i>
                                     </div>
                                     <div class="link-info">
+                                        <?php if (!empty($link['image_url'])): ?>
+                                            <div class="link-image-thumb">
+                                                <img src="<?php echo htmlspecialchars($link['image_url']); ?>" alt="Anteprima immagine link">
+                                            </div>
+                                        <?php endif; ?>
                                         <div class="link-title"><?php echo htmlspecialchars($link['title']); ?></div>
                                         <div class="link-url"><?php echo htmlspecialchars($link['url']); ?></div>
                                         <div class="link-stats"><?php echo $link['click_count']; ?> click</div>
@@ -313,11 +327,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                          data-link-url="<?php echo htmlspecialchars($link['url']); ?>"
                                          data-link-icon="<?php echo htmlspecialchars($link['icon'] ?: 'fas fa-link'); ?>"
                                          data-link-color="<?php echo htmlspecialchars($link['color'] ?: '#007bff'); ?>"
+                                         data-link-image="<?php echo htmlspecialchars($link['image_url'] ?? ''); ?>"
                                          draggable="true">
                                         <div class="link-icon" style="background-color: <?php echo htmlspecialchars($link['color']); ?>">
                                             <i class="<?php echo htmlspecialchars($link['icon'] ?: 'fas fa-link'); ?>"></i>
                                         </div>
                                         <div class="link-info">
+                                            <?php if (!empty($link['image_url'])): ?>
+                                                <div class="link-image-thumb">
+                                                    <img src="<?php echo htmlspecialchars($link['image_url']); ?>" alt="Anteprima immagine link">
+                                                </div>
+                                            <?php endif; ?>
                                             <div class="link-title"><?php echo htmlspecialchars($link['title']); ?></div>
                                             <div class="link-url"><?php echo htmlspecialchars($link['url']); ?></div>
                                             <div class="link-stats"><?php echo $link['click_count']; ?> click</div>
@@ -667,6 +687,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="color" id="color" name="color" 
                            value="#007bff">
                 </div>
+
+                <div class="form-group">
+                    <label for="image_url">Immagine (URL opzionale)</label>
+                    <input type="url" id="image_url" name="image_url" 
+                           placeholder="https://esempio.com/immagine.jpg">
+                    <small class="form-hint">Se impostata, il link viene mostrato come card con immagine anche nel profilo pubblico.</small>
+                </div>
                 
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('linkModal')">
@@ -702,7 +729,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
- 
+
     <script src="assets/js/script.js"></script>
     <script>
         // Gestione tab del dashboard

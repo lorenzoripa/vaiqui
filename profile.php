@@ -134,14 +134,27 @@ if (isset($_GET['click']) && is_numeric($_GET['click'])) {
                     </div>
                 <?php else: ?>
                     <?php foreach ($profile['links'] as $link): ?>
+                        <?php $has_image = !empty($link['image_url']); ?>
                         <a href="profile.php?user=<?php echo htmlspecialchars($username); ?>&click=<?php echo $link['id']; ?>" 
-                           class="profile-link">
-                            <div class="profile-link-icon" style="background-color: <?php echo htmlspecialchars($link['color']); ?>">
-                                <i class="<?php echo htmlspecialchars($link['icon'] ?: 'fas fa-link'); ?>"></i>
-                            </div>
-                            <div class="profile-link-title">
-                                <?php echo htmlspecialchars($link['title']); ?>
-                            </div>
+                           class="profile-link<?php echo $has_image ? ' profile-link-image' : ''; ?>"
+                           <?php if ($has_image): ?>style="background-image: url('<?php echo htmlspecialchars($link['image_url']); ?>');"<?php endif; ?>>
+                            <?php if ($has_image): ?>
+                                <div class="profile-link-image-overlay">
+                                    <div class="profile-link-icon" style="background-color: <?php echo htmlspecialchars($link['color']); ?>">
+                                        <i class="<?php echo htmlspecialchars($link['icon'] ?: 'fas fa-link'); ?>"></i>
+                                    </div>
+                                    <div class="profile-link-title">
+                                        <?php echo htmlspecialchars($link['title']); ?>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="profile-link-icon" style="background-color: <?php echo htmlspecialchars($link['color']); ?>">
+                                    <i class="<?php echo htmlspecialchars($link['icon'] ?: 'fas fa-link'); ?>"></i>
+                                </div>
+                                <div class="profile-link-title">
+                                    <?php echo htmlspecialchars($link['title']); ?>
+                                </div>
+                            <?php endif; ?>
                         </a>
                     <?php endforeach; ?>
                 <?php endif; ?>

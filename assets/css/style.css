@@ -279,6 +279,25 @@ body {
 
 .link-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.link-image-thumb {
+    width: 100px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: #fff;
+}
+
+.link-image-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .link-title {
@@ -437,6 +456,54 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
+}
+
+.profile-link.profile-link-image {
+    position: relative;
+    display: block;
+    padding: 0;
+    border: none;
+    min-height: 180px;
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.profile-link.profile-link-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);
+    transition: opacity 0.3s ease;
+}
+
+.profile-link.profile-link-image:hover::before {
+    opacity: 0.85;
+}
+
+.profile-link-image-overlay {
+    position: absolute;
+    inset: 0;
+    padding: 20px;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    z-index: 1;
+}
+
+.profile-link.profile-link-image .profile-link-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    backdrop-filter: blur(2px);
+}
+
+.profile-link.profile-link-image .profile-link-title {
+    color: #fff;
+    font-size: 1.2rem;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.5);
 }
 
 .profile-link:hover {
