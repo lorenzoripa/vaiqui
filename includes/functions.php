@@ -16,9 +16,18 @@ function registerUser($username, $email, $password) {
         // Hash della password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         
+        // Genera token di verifica email
+        $verification_token = bin2hex(random_bytes(32));
+        $verification_expires = date('Y-m-d H:i:s', strtotime('+24 hours'));
+        
         // Inserisci il nuovo utente
-        $stmt = $pdo->prepare("INSERT INTO users (username, email, password, display_name) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$username, $email, $hashedPassword, $username]);
+        $stmt = $pdo->prepare("INSERT INTO users (username, email, password, display_name, verification_token, verification_token_expires, email_verified) VALUES (?, ?, ?, ?, ?, ?, FALSE)");
+        $stmt->execute([$username, $email, $hashedPassword, $username, $verification_token, $verification_expires]);
+        
+        $user_id = $pdo->lastInsertId();
+        
+        // Invia email di verifica
+        sendVerificationEmail($user_id, $email, $verification_token);
         
         return true;
     } catch (PDOException $e) {
@@ -717,6 +726,156 @@ function getAdminStats() {
             'total_clicks' => 0,
             'users_today' => 0
         ];
+    }
+}
+
+// ========== FUNZIONI PER VERIFICA EMAIL ==========
+
+// Invia email di verifica
+function sendVerificationEmail($user_id, $email, $token) {
+    global $pdo;
+    
+    try {
+        // Ottieni username per personalizzare l'email
+        $stmt = $pdo->prepare("SELECT username, display_name FROM users WHERE id = ?");
+        $stmt->execute([$user_id]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $username = $user['display_name'] ?? $user['username'];
+        
+        // Costruisci URL di verifica
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $base_url = $scheme . '://' . $_SERVER['HTTP_HOST'];
+        $verify_url = $base_url . '/verify_email.php?token=' . urlencode($token);
+        
+        // Soggetto email
+        $subject = "Verifica il tuo account VaiQui";
+        
+        // Corpo email HTML
+        $message = "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+                .button { display: inline-block; background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; margin: 20px 0; }
+                .footer { text-align: center; margin-top: 20px; color: #666; font-size: 0.9rem; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>Benvenuto su VaiQui!</h1>
+                </div>
+                <div class='content'>
+                    <p>Ciao <strong>{$username}</strong>,</p>
+                    <p>Grazie per esserti registrato su VaiQui! Per completare la registrazione, verifica il tuo indirizzo email cliccando sul pulsante qui sotto:</p>
+                    <p style='text-align: center;'>
+                        <a href='{$verify_url}' class='button'>Verifica Email</a>
+                    </p>
+                    <p>Oppure copia e incolla questo link nel tuo browser:</p>
+                    <p style='word-break: break-all; background: white; padding: 10px; border-radius: 5px;'>{$verify_url}</p>
+                    <p><strong>Nota:</strong> Questo link scadrà tra 24 ore.</p>
+                    <p>Se non hai creato un account su VaiQui, ignora questa email.</p>
+                </div>
+                <div class='footer'>
+                    <p>© " . date('Y') . " VaiQui - Il tuo Linktree personale</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+        
+        // Headers email
+        $headers = "MIME-Version: 1.0" . "\r\n";
+        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+        $headers .= "From: VaiQui <noreply@" . $_SERVER['HTTP_HOST'] . ">" . "\r\n";
+        $headers .= "Reply-To: noreply@" . $_SERVER['HTTP_HOST'] . "\r\n";
+        
+        // Invia email
+        $sent = mail($email, $subject, $message, $headers);
+        
+        if (!$sent) {
+            error_log("Errore invio email verifica a: $email");
+        }
+        
+        return $sent;
+    } catch (Exception $e) {
+        error_log("Errore sendVerificationEmail: " . $e->getMessage());
+        return false;
+    }
+}
+
+// Verifica token email
+function verifyEmailToken($token) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("SELECT id, email, verification_token_expires FROM users WHERE verification_token = ? AND email_verified = FALSE");
+        $stmt->execute([$token]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$user) {
+            return ['success' => false, 'message' => 'Token non valido o email già verificata'];
+        }
+        
+        // Verifica scadenza token
+        if (strtotime($user['verification_token_expires']) < time()) {
+            return ['success' => false, 'message' => 'Token scaduto. Richiedi un nuovo link di verifica.'];
+        }
+        
+        // Aggiorna utente come verificato
+        $stmt = $pdo->prepare("UPDATE users SET email_verified = TRUE, verification_token = NULL, verification_token_expires = NULL WHERE id = ?");
+        $stmt->execute([$user['id']]);
+        
+        return ['success' => true, 'user_id' => $user['id'], 'email' => $user['email']];
+    } catch (PDOException $e) {
+        error_log("Errore verifyEmailToken: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Errore durante la verifica'];
+    }
+}
+
+// Rigenera token di verifica e reinvia email
+function resendVerificationEmail($user_id) {
+    global $pdo;
+    
+    try {
+        // Verifica che l'utente esista e non sia già verificato
+        $stmt = $pdo->prepare("SELECT id, email, username, display_name, email_verified FROM users WHERE id = ?");
+        $stmt->execute([$user_id]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$user) {
+            return ['success' => false, 'message' => 'Utente non trovato'];
+        }
+        
+        if ($user['email_verified']) {
+            return ['success' => false, 'message' => 'Email già verificata'];
+        }
+        
+        // Genera nuovo token
+        $verification_token = bin2hex(random_bytes(32));
+        $verification_expires = date('Y-m-d H:i:s', strtotime('+24 hours'));
+        
+        // Aggiorna token nel database
+        $stmt = $pdo->prepare("UPDATE users SET verification_token = ?, verification_token_expires = ? WHERE id = ?");
+        $stmt->execute([$verification_token, $verification_expires, $user_id]);
+        
+        // Invia email
+        $sent = sendVerificationEmail($user_id, $user['email'], $verification_token);
+        
+        if ($sent) {
+            return ['success' => true, 'message' => 'Email di verifica inviata con successo'];
+        } else {
+            return ['success' => false, 'message' => 'Errore durante l\'invio dell\'email'];
+        }
+    } catch (PDOException $e) {
+        error_log("Errore resendVerificationEmail: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Errore durante la rigenerazione del token'];
     }
 }
 ?>

@@ -36,7 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         } else {
             $result = registerUser($username, $email, $password);
             if ($result === true) {
-                $success = "Registrazione completata! Ora puoi effettuare il login.";
+                $success = "Registrazione completata! Ti abbiamo inviato un'email di verifica. Controlla la tua casella di posta e clicca sul link per verificare il tuo account.";
+                $email_sent = true;
             } else {
                 $error = $result;
             }

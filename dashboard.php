@@ -235,6 +235,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 break;
 
+            case 'resend_verification':
+                $result = resendVerificationEmail($_SESSION['user_id']);
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
             case 'create_short_link':
                 $original_url = trim($_POST['original_url']);
                 $title = trim($_POST['short_title'] ?? '');
@@ -341,6 +350,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if (isset($success)): ?>
                     <div class="alert alert-success">
                         <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($success); ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (isset($user['email_verified']) && !$user['email_verified']): ?>
+                    <div class="alert alert-warning" style="background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                            <div style="flex: 1;">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                <strong>Email non verificata!</strong> 
+                                <p style="margin: 8px 0 0 0; font-size: 0.9rem;">
+                                    Controlla la tua casella di posta e clicca sul link di verifica. 
+                                    Non hai ricevuto l'email?
+                                </p>
+                            </div>
+                            <form method="POST" style="display: inline;">
+                                <input type="hidden" name="action" value="resend_verification">
+                                <button type="submit" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-paper-plane"></i> Reinvia Email
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 <?php endif; ?>
 

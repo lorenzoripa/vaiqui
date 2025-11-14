@@ -193,9 +193,18 @@ function createOrUpdateSocialUser($provider, $social_id, $email, $name, $picture
             
             if ($user) {
                 // Utente esistente con email, collega l'account social
-                $stmt = $pdo->prepare("UPDATE users SET {$social_id_field} = ?, avatar_url = ? WHERE id = ?");
-                $stmt->execute([$social_id, $picture, $user['id']]);
-                return $user;
+                // Se si collega con Google, verifica anche l'email se non è già verificata
+                if ($provider === 'google' && !$user['email_verified']) {
+                    $stmt = $pdo->prepare("UPDATE users SET {$social_id_field} = ?, avatar_url = ?, email_verified = TRUE WHERE id = ?");
+                    $stmt->execute([$social_id, $picture, $user['id']]);
+                } else {
+                    $stmt = $pdo->prepare("UPDATE users SET {$social_id_field} = ?, avatar_url = ? WHERE id = ?");
+                    $stmt->execute([$social_id, $picture, $user['id']]);
+                }
+                // Ricarica utente per avere dati aggiornati
+                $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+                $stmt->execute([$user['id']]);
+                return $stmt->fetch(PDO::FETCH_ASSOC);
             }
         }
         
@@ -204,8 +213,11 @@ function createOrUpdateSocialUser($provider, $social_id, $email, $name, $picture
         $display_name = $name ?: $username;
         $password_hash = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT); // Password casuale
         
-        $stmt = $pdo->prepare("INSERT INTO users (username, email, password, display_name, avatar_url, {$social_id_field}) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$username, $email, $password_hash, $display_name, $picture, $social_id]);
+        // Gli utenti registrati tramite Google hanno email già verificata
+        $email_verified = ($provider === 'google') ? 1 : 0;
+        
+        $stmt = $pdo->prepare("INSERT INTO users (username, email, password, display_name, avatar_url, {$social_id_field}, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$username, $email, $password_hash, $display_name, $picture, $social_id, $email_verified]);
         
         // Recupera l'utente appena creato
         $user_id = $pdo->lastInsertId();

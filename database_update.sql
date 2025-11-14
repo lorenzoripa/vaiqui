@@ -105,3 +105,9 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS longitude DECIMAL(11, 8) DEFAULT NULL
 -- Campo per ruolo utente (admin o user) - Area Amministrativa
 ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user';
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+
+-- Verifica email
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(100) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires DATETIME DEFAULT NULL;
+CREATE INDEX IF NOT EXISTS idx_verification_token ON users(verification_token);
