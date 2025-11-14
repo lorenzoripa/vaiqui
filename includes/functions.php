@@ -636,6 +636,30 @@ function deleteUser($user_id) {
     global $pdo;
     
     try {
+        // Prima elimina le immagini caricate dall'utente
+        $stmt = $pdo->prepare("SELECT image_url FROM links WHERE user_id = ? AND image_url IS NOT NULL AND image_url LIKE 'uploads/link_images/%'");
+        $stmt->execute([$user_id]);
+        $links_with_images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($links_with_images as $link) {
+            if (!empty($link['image_url'])) {
+                $image_path = __DIR__ . '/../' . $link['image_url'];
+                if (file_exists($image_path)) {
+                    @unlink($image_path);
+                }
+            }
+        }
+        
+        // Elimina anche i QR code dell'utente
+        $qr_dir = __DIR__ . '/../assets/qr_codes/';
+        if (is_dir($qr_dir)) {
+            $qr_pattern = $qr_dir . 'qr_' . $user_id . '_*';
+            $qr_files = glob($qr_pattern);
+            foreach ($qr_files as $qr_file) {
+                @unlink($qr_file);
+            }
+        }
+        
         // Le foreign key con ON DELETE CASCADE elimineranno automaticamente:
         // - links
         // - analytics
@@ -643,7 +667,13 @@ function deleteUser($user_id) {
         // - etc.
         
         $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-        return $stmt->execute([$user_id]);
+        $result = $stmt->execute([$user_id]);
+        
+        if ($result) {
+            error_log("Utente ID $user_id eliminato con successo");
+        }
+        
+        return $result;
     } catch (PDOException $e) {
         error_log("Errore deleteUser: " . $e->getMessage());
         return false;

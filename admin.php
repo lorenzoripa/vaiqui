@@ -337,14 +337,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                                     <option value="admin" <?php echo $user['role'] === 'admin' ? 'selected' : ''; ?>>Admin</option>
                                                 </select>
                                             </form>
-                                            <form method="POST" style="display: inline;" 
-                                                  onsubmit="return confirm('ATTENZIONE: Eliminare questo utente eliminerà anche tutti i suoi link e dati. Continuare?');">
-                                                <input type="hidden" name="action" value="delete_user">
-                                                <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button" class="btn btn-danger btn-sm" 
+                                                    onclick="confirmDeleteUser(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username'], ENT_QUOTES); ?>', <?php echo $user['link_count'] ?? 0; ?>, <?php echo $user['click_count'] ?? 0; ?>)">
+                                                <i class="fas fa-trash"></i> Elimina
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -382,6 +378,183 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <?php endif; ?>
         </div>
     </div>
+
+    <!-- Modal Conferma Eliminazione Utente -->
+    <div id="deleteUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i> Conferma Eliminazione Utente</h3>
+                <button class="close-modal" onclick="closeModal('deleteUserModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-error">
+                    <strong>ATTENZIONE:</strong> Questa azione è irreversibile!
+                </div>
+                <p>Stai per eliminare l'utente <strong id="deleteUserName"></strong>.</p>
+                <div class="delete-user-info">
+                    <p><i class="fas fa-link"></i> Link associati: <strong id="deleteUserLinks">0</strong></p>
+                    <p><i class="fas fa-mouse-pointer"></i> Click totali: <strong id="deleteUserClicks">0</strong></p>
+                </div>
+                <p class="warning-text">
+                    <i class="fas fa-exclamation-circle"></i> 
+                    Eliminando questo utente verranno eliminati anche:
+                </p>
+                <ul class="warning-list">
+                    <li>Tutti i suoi link</li>
+                    <li>Tutte le statistiche e analytics</li>
+                    <li>Tutti i link accorciati</li>
+                    <li>Tutti i dati del profilo</li>
+                </ul>
+                <form id="deleteUserForm" method="POST">
+                    <input type="hidden" name="action" value="delete_user">
+                    <input type="hidden" name="user_id" id="deleteUserId" value="">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteUserModal')">
+                    <i class="fas fa-times"></i> Annulla
+                </button>
+                <button type="button" class="btn btn-danger" onclick="submitDeleteUser()">
+                    <i class="fas fa-trash"></i> Elimina Definitivamente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmDeleteUser(userId, username, linkCount, clickCount) {
+            document.getElementById('deleteUserId').value = userId;
+            document.getElementById('deleteUserName').textContent = username;
+            document.getElementById('deleteUserLinks').textContent = linkCount;
+            document.getElementById('deleteUserClicks').textContent = clickCount;
+            openModal('deleteUserModal');
+        }
+
+        function submitDeleteUser() {
+            document.getElementById('deleteUserForm').submit();
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Chiudi modale cliccando fuori
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .delete-user-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .delete-user-info p {
+            margin: 8px 0;
+            color: #666;
+        }
+
+        .warning-text {
+            color: #dc3545;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .warning-list {
+            background: #fff3cd;
+            padding: 15px 15px 15px 35px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+
+        .warning-list li {
+            margin: 5px 0;
+            color: #856404;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e1e5e9;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+    </style>
 </body>
 </html>
 
