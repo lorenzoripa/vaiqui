@@ -522,4 +522,151 @@ function geocodeAddress($address) {
     
     return ['lat' => null, 'lng' => null];
 }
+
+// ========== FUNZIONI PER AREA AMMINISTRATIVA ==========
+
+// Verifica se un utente è admin
+function isAdmin($user_id) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");
+        $stmt->execute([$user_id]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $user && ($user['role'] === 'admin');
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+// Ottieni tutti gli utenti (per admin)
+function getAllUsers($limit = 100, $offset = 0, $search = '') {
+    global $pdo;
+    
+    try {
+        $query = "SELECT id, username, email, display_name, role, created_at, 
+                         (SELECT COUNT(*) FROM links WHERE user_id = users.id) as link_count,
+                         (SELECT COUNT(*) FROM analytics WHERE user_id = users.id) as click_count
+                  FROM users";
+        
+        $params = [];
+        if (!empty($search)) {
+            $query .= " WHERE username LIKE ? OR email LIKE ? OR display_name LIKE ?";
+            $searchParam = '%' . $search . '%';
+            $params = [$searchParam, $searchParam, $searchParam];
+        }
+        
+        $query .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        $params[] = $limit;
+        $params[] = $offset;
+        
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Errore getAllUsers: " . $e->getMessage());
+        return [];
+    }
+}
+
+// Conta totale utenti
+function getTotalUsers($search = '') {
+    global $pdo;
+    
+    try {
+        $query = "SELECT COUNT(*) as total FROM users";
+        $params = [];
+        
+        if (!empty($search)) {
+            $query .= " WHERE username LIKE ? OR email LIKE ? OR display_name LIKE ?";
+            $searchParam = '%' . $search . '%';
+            $params = [$searchParam, $searchParam, $searchParam];
+        }
+        
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'] ?? 0;
+    } catch (PDOException $e) {
+        return 0;
+    }
+}
+
+// Aggiorna ruolo utente
+function updateUserRole($user_id, $role) {
+    global $pdo;
+    
+    try {
+        $allowed_roles = ['user', 'admin'];
+        if (!in_array($role, $allowed_roles)) {
+            return false;
+        }
+        
+        $stmt = $pdo->prepare("UPDATE users SET role = ? WHERE id = ?");
+        return $stmt->execute([$role, $user_id]);
+    } catch (PDOException $e) {
+        error_log("Errore updateUserRole: " . $e->getMessage());
+        return false;
+    }
+}
+
+// Elimina utente (con tutti i suoi dati correlati)
+function deleteUser($user_id) {
+    global $pdo;
+    
+    try {
+        // Le foreign key con ON DELETE CASCADE elimineranno automaticamente:
+        // - links
+        // - analytics
+        // - short_links
+        // - etc.
+        
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+        return $stmt->execute([$user_id]);
+    } catch (PDOException $e) {
+        error_log("Errore deleteUser: " . $e->getMessage());
+        return false;
+    }
+}
+
+// Ottieni statistiche generali per admin
+function getAdminStats() {
+    global $pdo;
+    
+    try {
+        $stats = [];
+        
+        // Totale utenti
+        $stmt = $pdo->query("SELECT COUNT(*) as total FROM users");
+        $stats['total_users'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+        
+        // Utenti attivi (con almeno un link)
+        $stmt = $pdo->query("SELECT COUNT(DISTINCT user_id) as total FROM links");
+        $stats['active_users'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+        
+        // Totale link
+        $stmt = $pdo->query("SELECT COUNT(*) as total FROM links");
+        $stats['total_links'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+        
+        // Totale click
+        $stmt = $pdo->query("SELECT SUM(click_count) as total FROM links");
+        $stats['total_clicks'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+        
+        // Utenti registrati oggi
+        $stmt = $pdo->query("SELECT COUNT(*) as total FROM users WHERE DATE(created_at) = CURDATE()");
+        $stats['users_today'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+        
+        return $stats;
+    } catch (PDOException $e) {
+        error_log("Errore getAdminStats: " . $e->getMessage());
+        return [
+            'total_users' => 0,
+            'active_users' => 0,
+            'total_links' => 0,
+            'total_clicks' => 0,
+            'users_today' => 0
+        ];
+    }
+}
 ?>

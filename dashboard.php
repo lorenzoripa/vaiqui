@@ -290,6 +290,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
                 <p>Benvenuto, <?php echo htmlspecialchars($user['display_name'] ?? $user['username']); ?>!</p>
                 <div class="header-actions">
+                    <?php if (isAdmin($_SESSION['user_id'])): ?>
+                        <a href="admin.php" class="btn btn-outline" style="background: #dc3545; color: white; border-color: #dc3545;">
+                            <i class="fas fa-shield-alt"></i> Area Admin
+                        </a>
+                    <?php endif; ?>
                     <a href="profile.php?user=<?php echo htmlspecialchars($user['username']); ?>" target="_blank" class="btn btn-outline">
                         <i class="fas fa-external-link-alt"></i> Vedi Profilo
                     </a>
