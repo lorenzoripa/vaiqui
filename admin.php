@@ -22,6 +22,18 @@ $users = getAllUsers($per_page, $offset, $search);
 $total_users = getTotalUsers($search);
 $total_pages = ceil($total_users / $per_page);
 
+// Debug temporaneo (rimuovere in produzione)
+if (isset($_GET['debug'])) {
+    echo "<pre>";
+    echo "Total users: " . $total_users . "\n";
+    echo "Users found: " . count($users) . "\n";
+    echo "Page: " . $page . "\n";
+    echo "Offset: " . $offset . "\n";
+    print_r($users);
+    echo "</pre>";
+    exit;
+}
+
 // Gestione azioni admin
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     switch ($_POST['action']) {

@@ -545,27 +545,47 @@ function getAllUsers($limit = 100, $offset = 0, $search = '') {
     global $pdo;
     
     try {
-        $query = "SELECT id, username, email, display_name, role, created_at, 
-                         (SELECT COUNT(*) FROM links WHERE user_id = users.id) as link_count,
-                         (SELECT COUNT(*) FROM analytics WHERE user_id = users.id) as click_count
-                  FROM users";
+        $limit = (int)$limit;
+        $offset = (int)$offset;
+        
+        // Query base con LEFT JOIN per evitare problemi con subquery
+        $query = "SELECT u.id, u.username, u.email, 
+                         COALESCE(u.display_name, u.username) as display_name, 
+                         COALESCE(u.role, 'user') as role, 
+                         u.created_at,
+                         COUNT(DISTINCT l.id) as link_count,
+                         COALESCE(SUM(l.click_count), 0) as click_count
+                  FROM users u
+                  LEFT JOIN links l ON l.user_id = u.id";
         
         $params = [];
         if (!empty($search)) {
-            $query .= " WHERE username LIKE ? OR email LIKE ? OR display_name LIKE ?";
+            $query .= " WHERE u.username LIKE ? OR u.email LIKE ? OR u.display_name LIKE ?";
             $searchParam = '%' . $search . '%';
             $params = [$searchParam, $searchParam, $searchParam];
         }
         
-        $query .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-        $params[] = $limit;
-        $params[] = $offset;
+        $query .= " GROUP BY u.id, u.username, u.email, u.display_name, u.role, u.created_at";
+        $query .= " ORDER BY u.created_at DESC LIMIT " . $limit . " OFFSET " . $offset;
         
         $stmt = $pdo->prepare($query);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($params)) {
+            $stmt->execute($params);
+        } else {
+            $stmt->execute();
+        }
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Converti click_count a intero
+        foreach ($result as &$user) {
+            $user['click_count'] = (int)($user['click_count'] ?? 0);
+            $user['link_count'] = (int)($user['link_count'] ?? 0);
+        }
+        
+        return $result;
     } catch (PDOException $e) {
         error_log("Errore getAllUsers: " . $e->getMessage());
+        error_log("Query: " . $query);
         return [];
     }
 }
