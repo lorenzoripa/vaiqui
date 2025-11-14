@@ -54,14 +54,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <title>VaiQui - Il tuo Linktree personale</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
+    <style>
+        .hero-mini {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 20px;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero-mini h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .hero-mini p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+        
+        .auth-section {
+            padding: 60px 20px;
+            background: #f8f9fa;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .back-to-landing {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .back-to-landing a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .back-to-landing a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-mini h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="auth-container">
-            <div class="auth-header">
-                <h1><i class="fas fa-link"></i> VaiQui</h1>
-                <p>Il tuo Linktree personale</p>
+    <!-- Mini Hero Section -->
+    <section class="hero-mini">
+        <h1><i class="fas fa-link"></i> VaiQui</h1>
+        <p>Il tuo Linktree personale</p>
+    </section>
+
+    <!-- Auth Section -->
+    <section class="auth-section">
+        <div class="container">
+            <div class="back-to-landing">
+                <a href="landing.php"><i class="fas fa-arrow-left"></i> Torna alla presentazione</a>
             </div>
+            
+            <div class="auth-container">
 
             <?php if (isset($error)): ?>
                 <div class="alert alert-error">
@@ -132,8 +185,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <i class="fas fa-user-plus"></i> Registrati
                 </button>
             </form>
+            </div>
         </div>
-    </div>
+    </section>
 
     <script src="assets/js/script.js"></script>
 </body>
