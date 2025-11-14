@@ -121,27 +121,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         .users-table {
             background: white;
             border-radius: 12px;
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: visible;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            max-width: 100%;
         }
         
         .users-table table {
             width: 100%;
+            min-width: 1000px;
             border-collapse: collapse;
         }
         
         .users-table th {
             background: #f8f9fa;
-            padding: 15px;
+            padding: 12px 10px;
             text-align: left;
             font-weight: 600;
             color: #333;
             border-bottom: 2px solid #e1e5e9;
+            white-space: nowrap;
+        }
+        
+        .users-table th:last-child {
+            position: sticky;
+            right: 0;
+            background: #f8f9fa;
+            z-index: 10;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
         }
         
         .users-table td {
-            padding: 15px;
+            padding: 12px 10px;
             border-bottom: 1px solid #e1e5e9;
+            white-space: nowrap;
+        }
+        
+        .users-table td:last-child {
+            position: sticky;
+            right: 0;
+            background: white;
+            z-index: 5;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .users-table tr:hover td:last-child {
+            background: #f8f9fa;
         }
         
         .users-table tr:hover {
@@ -168,12 +193,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         
         .admin-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: nowrap;
+            min-width: 200px;
+        }
+        
+        .admin-actions form {
+            display: inline-block;
+        }
+        
+        .admin-actions select {
+            padding: 6px 8px;
+            font-size: 0.85rem;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
         }
         
         .btn-sm {
-            padding: 6px 12px;
+            padding: 6px 10px;
             font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        
+        .btn-danger.btn-sm {
+            min-width: 36px;
+            padding: 6px 8px;
+        }
+        
+        .btn-danger.btn-sm i {
+            font-size: 0.9rem;
         }
         
         .search-box {
@@ -215,6 +265,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             background: #667eea;
             color: white;
             border-color: #667eea;
+        }
+        
+        /* Scrollbar personalizzata per la tabella */
+        .users-table::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .users-table::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .users-table::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .users-table::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Assicura che il container non tagli la tabella */
+        .container {
+            max-width: 100%;
+            overflow-x: visible;
+        }
+        
+        .dashboard {
+            max-width: 100%;
+            overflow-x: visible;
         }
     </style>
 </head>
@@ -338,8 +418,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                                 </select>
                                             </form>
                                             <button type="button" class="btn btn-danger btn-sm" 
-                                                    onclick="confirmDeleteUser(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username'], ENT_QUOTES); ?>', <?php echo $user['link_count'] ?? 0; ?>, <?php echo $user['click_count'] ?? 0; ?>)">
-                                                <i class="fas fa-trash"></i> Elimina
+                                                    onclick="confirmDeleteUser(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username'], ENT_QUOTES); ?>', <?php echo $user['link_count'] ?? 0; ?>, <?php echo $user['click_count'] ?? 0; ?>)"
+                                                    title="Elimina utente">
+                                                <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
                                     </td>
