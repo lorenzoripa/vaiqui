@@ -1,7 +1,7 @@
 <?php
 require_once 'config/database.php';
 require_once 'includes/functions.php';
-require_once 'includes/profile_customization.php';
+require_once 'includes/templates.php';
 
 // Ottieni l'username dall'URL
 $username = $_GET['user'] ?? '';
@@ -68,38 +68,130 @@ if (isset($_GET['click']) && is_numeric($_GET['click'])) {
     
     <?php
     // Ottieni le personalizzazioni del profilo
-    $customization = getProfileCustomization($profile['id']);
-    if ($customization) {
-        echo generateCustomCSS($customization);
-    }
+    $template = $profile['template'] ?? 'default';
+    $user_settings = [
+        'template' => $template,
+        'background_type' => $profile['background_type'] ?? 'gradient',
+        'background_color' => $profile['background_color'] ?? '#667eea',
+        'background_gradient' => $profile['background_gradient'] ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'background_image' => $profile['background_image'] ?? null,
+        'text_color' => $profile['text_color'] ?? '#ffffff',
+        'link_style' => $profile['link_style'] ?? 'card',
+        'link_color' => $profile['link_color'] ?? null,
+        'link_hover_color' => $profile['link_hover_color'] ?? null,
+        'button_border_radius' => $profile['button_border_radius'] ?? 12,
+        'button_shadow' => $profile['button_shadow'] ?? true,
+        'font_family' => $profile['font_family'] ?? 'system',
+        'profile_layout' => $profile['profile_layout'] ?? 'centered',
+        'show_social_icons' => $profile['show_social_icons'] ?? true,
+        'custom_css' => $profile['custom_css'] ?? null
+    ];
+    
+    $template_css = getTemplateCSS($template, $user_settings);
     ?>
     
     <style>
-        /* Tema personalizzato per il profilo */
-        .profile-page.theme-<?php echo htmlspecialchars($profile['theme'] ?? 'default'); ?> {
-            /* Stili specifici per il tema selezionato */
+        <?php echo $template_css; ?>
+        
+        /* Stili aggiuntivi per il profilo */
+        .profile-page {
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .profile-container {
+            max-width: 600px;
+            margin: 0 auto;
         }
         
         .profile-header {
-            background: <?php echo $customization['primary_color'] ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; ?>;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            margin-bottom: 20px;
+        }
+        
+        .profile-avatar-placeholder {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .profile-name {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .profile-bio {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .profile-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         
         .profile-link {
+            display: block;
+            padding: 20px;
+            text-decoration: none;
             transition: all 0.3s ease;
-            background: <?php echo $customization['button_color'] ?? '#f8f9fa'; ?>;
-            color: <?php echo $customization['button_text_color'] ?? '#333'; ?>;
-            border-radius: <?php echo ($customization['border_radius'] ?? 12); ?>px;
+            position: relative;
+            overflow: hidden;
         }
         
-        .profile-link:hover {
-            transform: translateY(-<?php echo ($customization['animation_style'] ?? 'subtle') === 'strong' ? '3px' : '2px'; ?>);
-            box-shadow: <?php echo ($customization['shadow_style'] ?? 'subtle') === 'strong' ? '0 8px 25px rgba(0,0,0,0.15)' : '0 5px 15px rgba(0,0,0,0.1)'; ?>;
+        .profile-link-image {
+            min-height: 200px;
+            background-size: cover;
+            background-position: center;
         }
         
-        .profile-page {
-            font-family: <?php echo $customization['font_family'] ?? 'inherit'; ?>;
-            background: <?php echo $customization['background_color'] ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; ?>;
-            color: <?php echo $customization['text_color'] ?? 'white'; ?>;
+        .profile-link-image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .profile-link-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .profile-link-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
         }
     </style>
 </head>

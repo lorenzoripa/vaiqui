@@ -142,6 +142,103 @@ function updateProfile($user_id, $display_name, $bio, $avatar = null) {
     }
 }
 
+// Aggiorna impostazioni template e personalizzazione
+function updateTemplateSettings($user_id, $settings) {
+    global $pdo;
+    
+    try {
+        $fields = [];
+        $values = [];
+        
+        if (isset($settings['template'])) {
+            $fields[] = 'template = ?';
+            $values[] = $settings['template'];
+        }
+        
+        if (isset($settings['background_type'])) {
+            $fields[] = 'background_type = ?';
+            $values[] = $settings['background_type'];
+        }
+        
+        if (isset($settings['background_color'])) {
+            $fields[] = 'background_color = ?';
+            $values[] = $settings['background_color'];
+        }
+        
+        if (isset($settings['background_gradient'])) {
+            $fields[] = 'background_gradient = ?';
+            $values[] = $settings['background_gradient'];
+        }
+        
+        if (isset($settings['background_image'])) {
+            $fields[] = 'background_image = ?';
+            $values[] = $settings['background_image'];
+        }
+        
+        if (isset($settings['text_color'])) {
+            $fields[] = 'text_color = ?';
+            $values[] = $settings['text_color'];
+        }
+        
+        if (isset($settings['link_style'])) {
+            $fields[] = 'link_style = ?';
+            $values[] = $settings['link_style'];
+        }
+        
+        if (isset($settings['link_color'])) {
+            $fields[] = 'link_color = ?';
+            $values[] = $settings['link_color'];
+        }
+        
+        if (isset($settings['link_hover_color'])) {
+            $fields[] = 'link_hover_color = ?';
+            $values[] = $settings['link_hover_color'];
+        }
+        
+        if (isset($settings['button_border_radius'])) {
+            $fields[] = 'button_border_radius = ?';
+            $values[] = (int)$settings['button_border_radius'];
+        }
+        
+        if (isset($settings['button_shadow'])) {
+            $fields[] = 'button_shadow = ?';
+            $values[] = $settings['button_shadow'] ? 1 : 0;
+        }
+        
+        if (isset($settings['font_family'])) {
+            $fields[] = 'font_family = ?';
+            $values[] = $settings['font_family'];
+        }
+        
+        if (isset($settings['profile_layout'])) {
+            $fields[] = 'profile_layout = ?';
+            $values[] = $settings['profile_layout'];
+        }
+        
+        if (isset($settings['show_social_icons'])) {
+            $fields[] = 'show_social_icons = ?';
+            $values[] = $settings['show_social_icons'] ? 1 : 0;
+        }
+        
+        if (isset($settings['custom_css'])) {
+            $fields[] = 'custom_css = ?';
+            $values[] = $settings['custom_css'];
+        }
+        
+        if (empty($fields)) {
+            return false;
+        }
+        
+        $values[] = $user_id;
+        $query = "UPDATE users SET " . implode(', ', $fields) . " WHERE id = ?";
+        $stmt = $pdo->prepare($query);
+        return $stmt->execute($values);
+    } catch (PDOException $e) {
+        error_log("Errore updateTemplateSettings: " . $e->getMessage());
+        return false;
+    }
+}
+
 // Funzione per registrare un click su un link
 function recordClick($user_id, $link_id, $ip_address, $user_agent, $referer = null) {
     global $pdo;
@@ -200,7 +297,7 @@ function getPublicProfile($username) {
     global $pdo;
     
     try {
-        $stmt = $pdo->prepare("SELECT id, username, display_name, bio, avatar, theme, address, show_map, latitude, longitude, social_instagram, social_facebook, social_tiktok, social_twitter, social_linkedin, social_youtube FROM users WHERE username = ?");
+        $stmt = $pdo->prepare("SELECT id, username, display_name, bio, avatar, theme, address, show_map, latitude, longitude, social_instagram, social_facebook, social_tiktok, social_twitter, social_linkedin, social_youtube, template, background_type, background_color, background_gradient, background_image, text_color, link_style, link_color, link_hover_color, button_border_radius, button_shadow, font_family, profile_layout, show_social_icons, custom_css FROM users WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         

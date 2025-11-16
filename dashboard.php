@@ -3,6 +3,7 @@ session_start();
 require_once 'config/database.php';
 require_once 'includes/functions.php';
 require_once 'includes/qr_generator.php';
+require_once 'includes/templates.php';
 
 // Controlla se l'utente è loggato
 if (!isset($_SESSION['user_id'])) {
@@ -244,6 +245,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 break;
 
+            case 'update_template_settings':
+                require_once 'includes/templates.php';
+                
+                $settings = [];
+                if (isset($_POST['template'])) {
+                    $settings['template'] = $_POST['template'];
+                }
+                if (isset($_POST['background_type'])) {
+                    $settings['background_type'] = $_POST['background_type'];
+                }
+                if (isset($_POST['background_color'])) {
+                    $settings['background_color'] = $_POST['background_color'];
+                }
+                if (isset($_POST['background_gradient'])) {
+                    $settings['background_gradient'] = $_POST['background_gradient'];
+                }
+                if (isset($_POST['background_image'])) {
+                    $settings['background_image'] = $_POST['background_image'];
+                }
+                if (isset($_POST['text_color'])) {
+                    $settings['text_color'] = $_POST['text_color'];
+                }
+                if (isset($_POST['link_style'])) {
+                    $settings['link_style'] = $_POST['link_style'];
+                }
+                if (isset($_POST['link_color'])) {
+                    $settings['link_color'] = $_POST['link_color'];
+                }
+                if (isset($_POST['link_hover_color'])) {
+                    $settings['link_hover_color'] = $_POST['link_hover_color'];
+                }
+                if (isset($_POST['button_border_radius'])) {
+                    $settings['button_border_radius'] = (int)$_POST['button_border_radius'];
+                }
+                if (isset($_POST['button_shadow'])) {
+                    $settings['button_shadow'] = isset($_POST['button_shadow']);
+                }
+                if (isset($_POST['font_family'])) {
+                    $settings['font_family'] = $_POST['font_family'];
+                }
+                if (isset($_POST['profile_layout'])) {
+                    $settings['profile_layout'] = $_POST['profile_layout'];
+                }
+                if (isset($_POST['show_social_icons'])) {
+                    $settings['show_social_icons'] = isset($_POST['show_social_icons']);
+                }
+                if (isset($_POST['custom_css'])) {
+                    $settings['custom_css'] = $_POST['custom_css'];
+                }
+                
+                if (updateTemplateSettings($_SESSION['user_id'], $settings)) {
+                    $success = "Impostazioni template aggiornate con successo!";
+                    // Ricarica dati utente
+        $user = getUser($_SESSION['user_id']);
+                } else {
+                    $error = "Errore durante l'aggiornamento delle impostazioni";
+                }
+                break;
+
             case 'create_short_link':
                 $original_url = trim($_POST['original_url']);
                 $title = trim($_POST['short_title'] ?? '');
@@ -263,7 +323,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($short_link_id && deleteShortLink($short_link_id, $_SESSION['user_id'])) {
                     $success = "Link accorciato eliminato con successo!";
-                } else {
+    } else {
                     $error = "Errore durante l'eliminazione del link accorciato";
                 }
                 break;
@@ -539,8 +599,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="header-actions">
                             <a href="short-links.php" class="btn btn-outline">
                                 <i class="fas fa-external-link-alt"></i> Vista completa
-                            </a>
-                        </div>
+                        </a>
+                    </div>
                     </div>
 
                     <div class="stats-grid">
@@ -725,22 +785,251 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div id="customize-tab" class="tab-content">
                     <div class="section-header">
                         <h2><i class="fas fa-palette"></i> Personalizza Profilo</h2>
-                        <a href="customize.php" class="btn btn-primary">
-                            <i class="fas fa-external-link-alt"></i> Personalizza Avanzata
+                        <a href="profile.php?user=<?php echo htmlspecialchars($user['username']); ?>" target="_blank" class="btn btn-outline">
+                            <i class="fas fa-external-link-alt"></i> Anteprima Profilo
                         </a>
                     </div>
-                    <div class="info-card">
-                        <i class="fas fa-paint-brush"></i>
-                        <h3>Personalizzazione Avanzata</h3>
-                        <p>Personalizza completamente l'aspetto del tuo profilo pubblico con temi, colori, font e CSS personalizzato.</p>
-                        <ul>
-                            <li>Temi predefiniti e personalizzati</li>
-                            <li>Colori personalizzabili</li>
-                            <li>Font e tipografia</li>
-                            <li>CSS personalizzato</li>
-                            <li>Anteprima in tempo reale</li>
-                        </ul>
+
+                    <form method="POST" id="template-form">
+                        <input type="hidden" name="action" value="update_template_settings">
+
+                        <!-- Sezione Template -->
+                        <div class="customize-section">
+                            <h3><i class="fas fa-layer-group"></i> Seleziona Template</h3>
+                            <p class="section-description">Scegli un template predefinito per il tuo profilo</p>
+                            
+                            <div class="templates-grid">
+                                <?php 
+                                $templates = getAvailableTemplates();
+                                $current_template = $user['template'] ?? 'default';
+                                foreach ($templates as $key => $template): 
+                                ?>
+                                    <label class="template-card <?php echo $current_template === $key ? 'active' : ''; ?>">
+                                        <input type="radio" name="template" value="<?php echo $key; ?>" 
+                                               <?php echo $current_template === $key ? 'checked' : ''; ?>>
+                                        <div class="template-preview" style="background: <?php echo htmlspecialchars($template['preview']); ?>;"></div>
+                                        <div class="template-info">
+                                            <h4><?php echo htmlspecialchars($template['name']); ?></h4>
+                                            <p><?php echo htmlspecialchars($template['description']); ?></p>
                     </div>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <!-- Sezione Background -->
+                        <div class="customize-section">
+                            <h3><i class="fas fa-image"></i> Personalizza Sfondo</h3>
+                            <p class="section-description">Scegli il tipo di sfondo per il tuo profilo</p>
+                            
+                            <div class="form-group">
+                                <label>Tipo di Sfondo</label>
+                                <select name="background_type" id="background_type" class="form-control">
+                                    <option value="gradient" <?php echo ($user['background_type'] ?? 'gradient') === 'gradient' ? 'selected' : ''; ?>>Gradiente</option>
+                                    <option value="color" <?php echo ($user['background_type'] ?? '') === 'color' ? 'selected' : ''; ?>>Colore Solido</option>
+                                    <option value="image" <?php echo ($user['background_type'] ?? '') === 'image' ? 'selected' : ''; ?>>Immagine</option>
+                                </select>
+                            </div>
+
+                            <!-- Gradiente -->
+                            <div id="gradient-options" class="background-options">
+                                <div class="form-group">
+                                    <label>Gradiente Predefinito</label>
+                                    <div class="gradients-grid">
+                                        <?php 
+                                        $gradients = getPresetGradients();
+                                        $current_gradient = $user['background_gradient'] ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                                        foreach ($gradients as $name => $gradient): 
+                                        ?>
+                                            <label class="gradient-option <?php echo $current_gradient === $gradient ? 'active' : ''; ?>">
+                                                <input type="radio" name="background_gradient" value="<?php echo htmlspecialchars($gradient); ?>"
+                                                       <?php echo $current_gradient === $gradient ? 'checked' : ''; ?>>
+                                                <div class="gradient-preview" style="background: <?php echo htmlspecialchars($gradient); ?>;"></div>
+                                                <span><?php echo ucfirst($name); ?></span>
+                                            </label>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Colore Solido -->
+                            <div id="color-options" class="background-options" style="display: none;">
+                                <div class="form-group">
+                                    <label>Colore Sfondo</label>
+                                    <input type="color" name="background_color" id="background_color" 
+                                           value="<?php echo htmlspecialchars($user['background_color'] ?? '#667eea'); ?>" 
+                                           class="form-control" style="width: 100px; height: 50px;">
+                                </div>
+                            </div>
+
+                            <!-- Immagine -->
+                            <div id="image-options" class="background-options" style="display: none;">
+                                <div class="form-group">
+                                    <label>URL Immagine Sfondo</label>
+                                    <input type="url" name="background_image" id="background_image" 
+                                           value="<?php echo htmlspecialchars($user['background_image'] ?? ''); ?>" 
+                                           class="form-control" placeholder="https://example.com/image.jpg">
+                                    <small>Inserisci l'URL di un'immagine per lo sfondo</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sezione Colori Testo -->
+                        <div class="customize-section">
+                            <h3><i class="fas fa-font"></i> Colore Testo</h3>
+                            <p class="section-description">Scegli il colore del testo per il tuo profilo</p>
+                            
+                            <div class="form-group">
+                                <label>Colore Testo</label>
+                                <input type="color" name="text_color" id="text_color" 
+                                       value="<?php echo htmlspecialchars($user['text_color'] ?? '#ffffff'); ?>" 
+                                       class="form-control" style="width: 100px; height: 50px;">
+                            </div>
+                        </div>
+
+                        <!-- Sezione Stile Link -->
+                        <div class="customize-section">
+                            <h3><i class="fas fa-link"></i> Stile Link</h3>
+                            <p class="section-description">Scegli come visualizzare i link nel tuo profilo</p>
+                            
+                            <div class="form-group">
+                                <label>Stile Link</label>
+                                <select name="link_style" class="form-control">
+                                    <?php 
+                                    $link_styles = getAvailableLinkStyles();
+                                    $current_style = $user['link_style'] ?? 'card';
+                                    foreach ($link_styles as $key => $style): 
+                                    ?>
+                                        <option value="<?php echo $key; ?>" <?php echo $current_style === $key ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($style['name']); ?> - <?php echo htmlspecialchars($style['description']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Colore Link</label>
+                                <input type="color" name="link_color" id="link_color" 
+                                       value="<?php echo htmlspecialchars($user['link_color'] ?? '#667eea'); ?>" 
+                                       class="form-control" style="width: 100px; height: 50px;">
+                                <small>Colore di sfondo dei link</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Colore Hover Link</label>
+                                <input type="color" name="link_hover_color" id="link_hover_color" 
+                                       value="<?php echo htmlspecialchars($user['link_hover_color'] ?? '#5568d3'); ?>" 
+                                       class="form-control" style="width: 100px; height: 50px;">
+                                <small>Colore quando passi il mouse sui link</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Border Radius (px)</label>
+                                <input type="number" name="button_border_radius" id="button_border_radius" 
+                                       value="<?php echo htmlspecialchars($user['button_border_radius'] ?? 12); ?>" 
+                                       class="form-control" min="0" max="50">
+                                <small>Quanto arrotondare gli angoli dei link (0-50px)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="button_shadow" value="1" 
+                                           <?php echo ($user['button_shadow'] ?? true) ? 'checked' : ''; ?>>
+                                    Mostra ombra sui link
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Sezione Layout e Font -->
+                        <div class="customize-section">
+                            <h3><i class="fas fa-align-center"></i> Layout e Font</h3>
+                            <p class="section-description">Personalizza il layout e il font del profilo</p>
+                            
+                            <div class="form-group">
+                                <label>Layout Profilo</label>
+                                <select name="profile_layout" class="form-control">
+                                    <option value="centered" <?php echo ($user['profile_layout'] ?? 'centered') === 'centered' ? 'selected' : ''; ?>>Centrato</option>
+                                    <option value="left" <?php echo ($user['profile_layout'] ?? '') === 'left' ? 'selected' : ''; ?>>Sinistra</option>
+                                    <option value="right" <?php echo ($user['profile_layout'] ?? '') === 'right' ? 'selected' : ''; ?>>Destra</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Font Family</label>
+                                <select name="font_family" class="form-control">
+                                    <option value="system" <?php echo ($user['font_family'] ?? 'system') === 'system' ? 'selected' : ''; ?>>System Default</option>
+                                    <option value="inter" <?php echo ($user['font_family'] ?? '') === 'inter' ? 'selected' : ''; ?>>Inter</option>
+                                    <option value="poppins" <?php echo ($user['font_family'] ?? '') === 'poppins' ? 'selected' : ''; ?>>Poppins</option>
+                                    <option value="montserrat" <?php echo ($user['font_family'] ?? '') === 'montserrat' ? 'selected' : ''; ?>>Montserrat</option>
+                                    <option value="roboto" <?php echo ($user['font_family'] ?? '') === 'roboto' ? 'selected' : ''; ?>>Roboto</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="show_social_icons" value="1" 
+                                           <?php echo ($user['show_social_icons'] ?? true) ? 'checked' : ''; ?>>
+                                    Mostra icone social in fondo al profilo
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Sezione CSS Personalizzato -->
+                        <div class="customize-section">
+                            <h3><i class="fas fa-code"></i> CSS Personalizzato</h3>
+                            <p class="section-description">Aggiungi CSS personalizzato per un controllo totale sul design</p>
+                            
+                            <div class="form-group">
+                                <label>CSS Personalizzato</label>
+                                <textarea name="custom_css" id="custom_css" class="form-control" rows="8" 
+                                          placeholder=".link-item { /* tuo CSS qui */ }"><?php echo htmlspecialchars($user['custom_css'] ?? ''); ?></textarea>
+                                <small>Inserisci il tuo CSS personalizzato. Usa con cautela!</small>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salva Impostazioni
+                            </button>
+                            <a href="profile.php?user=<?php echo htmlspecialchars($user['username']); ?>" target="_blank" class="btn btn-outline">
+                                <i class="fas fa-eye"></i> Anteprima
+                            </a>
+                        </div>
+                    </form>
+                    
+                    <script>
+                        // Gestione opzioni background dinamiche
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const backgroundType = document.getElementById('background_type');
+                            const gradientOptions = document.getElementById('gradient-options');
+                            const colorOptions = document.getElementById('color-options');
+                            const imageOptions = document.getElementById('image-options');
+                            
+                            function updateBackgroundOptions() {
+                                const type = backgroundType.value;
+                                
+                                // Nascondi tutte le opzioni
+                                gradientOptions.style.display = 'none';
+                                colorOptions.style.display = 'none';
+                                imageOptions.style.display = 'none';
+                                
+                                // Mostra solo l'opzione selezionata
+                                if (type === 'gradient') {
+                                    gradientOptions.style.display = 'block';
+                                } else if (type === 'color') {
+                                    colorOptions.style.display = 'block';
+                                } else if (type === 'image') {
+                                    imageOptions.style.display = 'block';
+                                }
+                            }
+                            
+                            // Inizializza
+                            updateBackgroundOptions();
+                            
+                            // Aggiorna quando cambia la selezione
+                            backgroundType.addEventListener('change', updateBackgroundOptions);
+                        });
+                    </script>
                 </div>
 
                 <!-- Tab Impostazioni -->
