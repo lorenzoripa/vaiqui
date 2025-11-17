@@ -142,7 +142,7 @@ function getTemplateCSS($template, $user_settings) {
     switch ($template) {
         case 'minimal':
             $css .= "
-                body { background: #f8f9fa; color: #1a1a1a; }
+                .profile-page { background: #f8f9fa; color: #1a1a1a; }
                 .profile-container { background: white; border-radius: 0; box-shadow: none; }
                 .profile-header { border-bottom: 1px solid #e5e7eb; }
             ";
@@ -150,27 +150,27 @@ function getTemplateCSS($template, $user_settings) {
             
         case 'dark':
             $css .= "
-                body { background: #0a0a0a; color: #ffffff; }
+                .profile-page { background: #0a0a0a; color: #ffffff; }
                 .profile-container { background: #1a1a1a; border: 1px solid #333; }
-                .link-item { background: #2a2a2a; border: 1px solid #444; }
-                .link-item:hover { background: #3a3a3a; }
+                .profile-link { background: #2a2a2a; border: 1px solid #444; }
+                .profile-link:hover { background: #3a3a3a; }
             ";
             break;
             
         case 'light':
             $css .= "
-                body { background: #ffffff; color: #1a1a1a; }
+                .profile-page { background: #ffffff; color: #1a1a1a; }
                 .profile-container { background: #f8f9fa; border: 1px solid #e5e7eb; }
-                .link-item { background: white; border: 1px solid #e5e7eb; }
+                .profile-link { background: white; border: 1px solid #e5e7eb; }
             ";
             break;
             
         case 'neon':
             $css .= "
-                body { background: #0a0a0a; color: #00ff88; }
+                .profile-page { background: #0a0a0a; color: #00ff88; }
                 .profile-container { background: rgba(0, 0, 0, 0.8); border: 2px solid #00ff88; box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
-                .link-item { background: rgba(0, 255, 136, 0.1); border: 2px solid #00ff88; }
-                .link-item:hover { box-shadow: 0 0 15px rgba(0, 255, 136, 0.5); }
+                .profile-link { background: rgba(0, 255, 136, 0.1); border: 2px solid #00ff88; }
+                .profile-link:hover { box-shadow: 0 0 15px rgba(0, 255, 136, 0.5); }
             ";
             break;
             
@@ -193,7 +193,7 @@ function getTemplateCSS($template, $user_settings) {
     
     // CSS base con background personalizzato
     $css .= "
-        body { {$background_css} color: {$text_color}; }
+        .profile-page { {$background_css} color: {$text_color}; }
     ";
     
     // Font family
@@ -221,26 +221,26 @@ function getTemplateCSS($template, $user_settings) {
         default:
             $font_css = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     }
-    $css .= "body { font-family: {$font_css}; }";
+    $css .= ".profile-page { font-family: {$font_css}; }";
     
     // Border radius
     $border_radius = $user_settings['button_border_radius'] ?? 12;
-    $css .= ".link-item { border-radius: {$border_radius}px; }";
+    $css .= ".profile-link { border-radius: {$border_radius}px; }";
     
     // Button shadow
     $button_shadow = $user_settings['button_shadow'] ?? true;
     if (!$button_shadow) {
-        $css .= ".link-item { box-shadow: none !important; }";
+        $css .= ".profile-link { box-shadow: none !important; }";
     }
     
     // Link colors
     $link_color = $user_settings['link_color'] ?? null;
     $link_hover_color = $user_settings['link_hover_color'] ?? null;
     if ($link_color) {
-        $css .= ".link-item { background-color: {$link_color}; }";
+        $css .= ".profile-link { background-color: {$link_color}; }";
     }
     if ($link_hover_color) {
-        $css .= ".link-item:hover { background-color: {$link_hover_color}; }";
+        $css .= ".profile-link:hover { background-color: {$link_hover_color}; }";
     }
     
     // Profile layout
@@ -262,26 +262,26 @@ function getTemplateCSS($template, $user_settings) {
     switch ($link_style) {
         case 'rounded':
             $css .= "
-                .link-item { border-radius: 20px; }
+                .profile-link { border-radius: 20px; }
             ";
             break;
             
         case 'minimal':
             $css .= "
-                .link-item { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); }
+                .profile-link { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); }
             ";
             break;
             
         case 'glass':
             $css .= "
-                .link-item { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); }
+                .profile-link { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); }
             ";
             break;
             
         case 'neon':
             $css .= "
-                .link-item { border: 2px solid {$text_color}; box-shadow: 0 0 10px rgba(102, 126, 234, 0.5); }
-                .link-item:hover { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8); }
+                .profile-link { border: 2px solid {$text_color}; box-shadow: 0 0 10px rgba(102, 126, 234, 0.5); }
+                .profile-link:hover { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8); }
             ";
             break;
     }

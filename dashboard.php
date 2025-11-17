@@ -1288,6 +1288,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             // Aggiorna quando cambia la selezione
                             backgroundType.addEventListener('change', updateBackgroundOptions);
+                            
+                            // Evidenzia template selezionato
+                            const templateCards = document.querySelectorAll('.template-card');
+                            templateCards.forEach(card => {
+                                const input = card.querySelector('input[type="radio"]');
+                                if (input.checked) {
+                                    card.classList.add('active');
+                                }
+                                input.addEventListener('change', () => {
+                                    templateCards.forEach(c => c.classList.remove('active'));
+                                    card.classList.add('active');
+                                });
+                            });
+                            
+                            // Evidenzia gradiente selezionato
+                            const gradientOptionsRadios = document.querySelectorAll('.gradient-option input[type="radio"]');
+                            gradientOptionsRadios.forEach(radio => {
+                                if (radio.checked) {
+                                    radio.closest('.gradient-option').classList.add('active');
+                                }
+                                radio.addEventListener('change', () => {
+                                    document.querySelectorAll('.gradient-option').forEach(option => option.classList.remove('active'));
+                                    radio.closest('.gradient-option').classList.add('active');
+                                });
+                            });
                         });
                     </script>
                 </div>
