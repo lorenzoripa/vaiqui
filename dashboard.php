@@ -593,7 +593,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: 1px solid #e5e7eb;
             box-shadow: 0 10px 25px rgba(0,0,0,0.08);
             position: sticky;
-            top: 100px;
+            top: 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: calc(100vh - 120px);
         }
         
         .preview-header {
@@ -605,11 +609,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         .preview-frame {
             width: 100%;
-            height: 650px;
             border: none;
             border-radius: 12px;
             background: #f8f9fa;
             box-shadow: inset 0 0 0 1px #e5e7eb;
+            flex: 1;
+            min-height: 400px;
         }
         
         .preview-hint {
@@ -671,6 +676,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .customize-preview {
                 position: relative;
                 top: 0;
+                max-height: none;
             }
             
             .form-actions {
