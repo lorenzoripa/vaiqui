@@ -598,6 +598,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flex-direction: column;
             gap: 15px;
             max-height: calc(100vh - 120px);
+            align-self: flex-start;
         }
         
         .preview-header {
@@ -1405,6 +1406,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 input.addEventListener('change', () => {
                                     templateCards.forEach(c => c.classList.remove('active'));
                                     card.classList.add('active');
+                                    queueAutoSave();
                                 });
                             });
                             
@@ -1417,6 +1419,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 radio.addEventListener('change', () => {
                                     document.querySelectorAll('.gradient-option').forEach(option => option.classList.remove('active'));
                                     radio.closest('.gradient-option').classList.add('active');
+                                    queueAutoSave();
                                 });
                             });
                             
