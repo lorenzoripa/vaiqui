@@ -142,7 +142,7 @@ function getTemplateCSS($template, $user_settings) {
     switch ($template) {
         case 'minimal':
             $css .= "
-                .profile-page { background: #f8f9fa; color: #1a1a1a; }
+                .profile-page, body.profile-body { background: #f8f9fa; color: #1a1a1a; }
                 .profile-container { background: white; border-radius: 0; box-shadow: none; }
                 .profile-header { border-bottom: 1px solid #e5e7eb; }
             ";
@@ -150,7 +150,7 @@ function getTemplateCSS($template, $user_settings) {
             
         case 'dark':
             $css .= "
-                .profile-page { background: #0a0a0a; color: #ffffff; }
+                .profile-page, body.profile-body { background: #0a0a0a; color: #ffffff; }
                 .profile-container { background: #1a1a1a; border: 1px solid #333; }
                 .profile-link { background: #2a2a2a; border: 1px solid #444; }
                 .profile-link:hover { background: #3a3a3a; }
@@ -159,7 +159,7 @@ function getTemplateCSS($template, $user_settings) {
             
         case 'light':
             $css .= "
-                .profile-page { background: #ffffff; color: #1a1a1a; }
+                .profile-page, body.profile-body { background: #ffffff; color: #1a1a1a; }
                 .profile-container { background: #f8f9fa; border: 1px solid #e5e7eb; }
                 .profile-link { background: white; border: 1px solid #e5e7eb; }
             ";
@@ -167,7 +167,7 @@ function getTemplateCSS($template, $user_settings) {
             
         case 'neon':
             $css .= "
-                .profile-page { background: #0a0a0a; color: #00ff88; }
+                .profile-page, body.profile-body { background: #0a0a0a; color: #00ff88; }
                 .profile-container { background: rgba(0, 0, 0, 0.8); border: 2px solid #00ff88; box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
                 .profile-link { background: rgba(0, 255, 136, 0.1); border: 2px solid #00ff88; }
                 .profile-link:hover { box-shadow: 0 0 15px rgba(0, 255, 136, 0.5); }
@@ -193,7 +193,7 @@ function getTemplateCSS($template, $user_settings) {
     
     // CSS base con background personalizzato
     $css .= "
-        .profile-page { {$background_css} color: {$text_color}; }
+        .profile-page, body.profile-body { {$background_css} color: {$text_color}; }
     ";
     
     // Font family
@@ -221,7 +221,7 @@ function getTemplateCSS($template, $user_settings) {
         default:
             $font_css = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     }
-    $css .= ".profile-page { font-family: {$font_css}; }";
+    $css .= ".profile-page, body.profile-body { font-family: {$font_css}; }";
     
     // Border radius
     $border_radius = $user_settings['button_border_radius'] ?? 12;

@@ -94,6 +94,11 @@ if (isset($_GET['click']) && is_numeric($_GET['click'])) {
         <?php echo $template_css; ?>
         
         /* Stili aggiuntivi per il profilo */
+        .profile-body {
+            margin: 0;
+            min-height: 100vh;
+        }
+        
         .profile-page {
             min-height: 100vh;
             padding: 40px 20px;
@@ -195,7 +200,7 @@ if (isset($_GET['click']) && is_numeric($_GET['click'])) {
         }
     </style>
 </head>
-<body>
+<body class="profile-body">
     <div class="container">
         <div class="profile-page theme-<?php echo htmlspecialchars($profile['theme']); ?>">
             <div class="profile-header">

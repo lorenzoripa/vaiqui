@@ -76,6 +76,8 @@ foreach ($short_links as $short_link) {
     $total_short_clicks += $short_link['click_count'];
 }
 
+$active_tab = $_GET['tab'] ?? 'overview';
+
 // Gestione delle azioni
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
@@ -247,6 +249,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             case 'update_template_settings':
                 require_once 'includes/templates.php';
+                $active_tab = 'customize';
                 
                 $settings = [];
                 if (isset($_POST['template'])) {
@@ -572,6 +575,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: 1px solid #e5e7eb;
         }
         
+        .customize-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        
+        .customize-main {
+            flex: 1 1 60%;
+        }
+        
+        .customize-preview {
+            flex: 1 1 40%;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 100px;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .preview-frame {
+            width: 100%;
+            height: 650px;
+            border: none;
+            border-radius: 12px;
+            background: #f8f9fa;
+            box-shadow: inset 0 0 0 1px #e5e7eb;
+        }
+        
+        .preview-hint {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+        }
+        
+        .autosave-status {
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #28a745;
+        }
+        
+        .autosave-status.saving {
+            color: #ff9800;
+        }
+        
+        .autosave-status.error {
+            color: #dc3545;
+        }
+        
         /* Form Actions */
         .form-actions {
             display: flex;
@@ -600,6 +662,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             .customize-section {
                 padding: 20px;
+            }
+            
+            .customize-layout {
+                flex-direction: column;
+            }
+            
+            .customize-preview {
+                position: relative;
+                top: 0;
             }
             
             .form-actions {
@@ -636,25 +707,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Menu di Navigazione -->
             <div class="dashboard-nav">
                 <div class="nav-tabs">
-                    <button class="nav-tab active" onclick="showTab('overview')">
+                    <button type="button" class="nav-tab <?php echo $active_tab === 'overview' ? 'active' : ''; ?>" data-tab="overview" onclick="showTab('overview', this)">
                         <i class="fas fa-home"></i> Panoramica
                     </button>
-                    <button class="nav-tab" onclick="showTab('links')">
+                    <button type="button" class="nav-tab <?php echo $active_tab === 'links' ? 'active' : ''; ?>" data-tab="links" onclick="showTab('links', this)">
                         <i class="fas fa-link"></i> Link
                     </button>
-                    <button class="nav-tab" onclick="showTab('short-links')">
+                    <button type="button" class="nav-tab <?php echo $active_tab === 'short-links' ? 'active' : ''; ?>" data-tab="short-links" onclick="showTab('short-links', this)">
                         <i class="fas fa-compress"></i> Link Accorciati
                     </button>
-                    <button class="nav-tab" onclick="showTab('analytics')">
+                    <button type="button" class="nav-tab <?php echo $active_tab === 'analytics' ? 'active' : ''; ?>" data-tab="analytics" onclick="showTab('analytics', this)">
                         <i class="fas fa-chart-line"></i> Analytics
                     </button>
-                    <button class="nav-tab" onclick="showTab('profile')">
+                    <button type="button" class="nav-tab <?php echo $active_tab === 'profile' ? 'active' : ''; ?>" data-tab="profile" onclick="showTab('profile', this)">
                         <i class="fas fa-user"></i> Profilo
                     </button>
-                    <button class="nav-tab" onclick="showTab('customize')">
+                    <button type="button" class="nav-tab <?php echo $active_tab === 'customize' ? 'active' : ''; ?>" data-tab="customize" onclick="showTab('customize', this)">
                         <i class="fas fa-palette"></i> Personalizza
                     </button>
-                    <button class="nav-tab" onclick="showTab('settings')">
+                    <button type="button" class="nav-tab <?php echo $active_tab === 'settings' ? 'active' : ''; ?>" data-tab="settings" onclick="showTab('settings', this)">
                         <i class="fas fa-cog"></i> Impostazioni
                     </button>
                 </div>
@@ -695,7 +766,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
 
                 <!-- Tab Panoramica -->
-                <div id="overview-tab" class="tab-content active">
+                <div id="overview-tab" class="tab-content <?php echo $active_tab === 'overview' ? 'active' : ''; ?>">
 
                 <!-- Statistiche -->
                 <div class="stats-grid">
@@ -795,7 +866,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <!-- Tab Link -->
-                <div id="links-tab" class="tab-content">
+                <div id="links-tab" class="tab-content <?php echo $active_tab === 'links' ? 'active' : ''; ?>">
                     <div class="links-section">
                         <div class="section-header">
                             <h2><i class="fas fa-link"></i> Gestione Link</h2>
@@ -853,7 +924,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <!-- Tab Link Accorciati -->
-                <div id="short-links-tab" class="tab-content">
+                <div id="short-links-tab" class="tab-content <?php echo $active_tab === 'short-links' ? 'active' : ''; ?>">
                     <div class="section-header">
                         <h2><i class="fas fa-compress"></i> Link Accorciati</h2>
                         <div class="header-actions">
@@ -995,7 +1066,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <!-- Tab Analytics -->
-                <div id="analytics-tab" class="tab-content">
+                <div id="analytics-tab" class="tab-content <?php echo $active_tab === 'analytics' ? 'active' : ''; ?>">
                     <div class="section-header">
                         <h2><i class="fas fa-chart-line"></i> Analytics</h2>
                         <a href="analytics.php" class="btn btn-primary">
@@ -1016,7 +1087,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <!-- Tab Profilo -->
-                <div id="profile-tab" class="tab-content">
+                <div id="profile-tab" class="tab-content <?php echo $active_tab === 'profile' ? 'active' : ''; ?>">
                     <div class="profile-section">
                         <div class="section-header">
                             <h2><i class="fas fa-user"></i> Gestione Profilo</h2>
@@ -1042,7 +1113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <!-- Tab Personalizza -->
-                <div id="customize-tab" class="tab-content">
+                <div id="customize-tab" class="tab-content <?php echo $active_tab === 'customize' ? 'active' : ''; ?>">
                     <div class="section-header">
                         <h2><i class="fas fa-palette"></i> Personalizza Profilo</h2>
                         <a href="profile.php?user=<?php echo htmlspecialchars($user['username']); ?>" target="_blank" class="btn btn-outline">
@@ -1050,11 +1121,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </a>
                     </div>
 
-                    <form method="POST" id="template-form">
-                        <input type="hidden" name="action" value="update_template_settings">
+                    <div class="customize-layout">
+                        <div class="customize-main">
+                        <form method="POST" id="template-form">
+                            <input type="hidden" name="action" value="update_template_settings">
+                            <div class="autosave-status" id="autoSaveStatus">Le modifiche vengono salvate automaticamente.</div>
 
-                        <!-- Sezione Template -->
-                        <div class="customize-section">
+                            <!-- Sezione Template -->
+                            <div class="customize-section">
                             <h3><i class="fas fa-layer-group"></i> Seleziona Template</h3>
                             <p class="section-description">Scegli un template predefinito per il tuo profilo</p>
                             
@@ -1245,25 +1319,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                           placeholder=".link-item { /* tuo CSS qui */ }"><?php echo htmlspecialchars($user['custom_css'] ?? ''); ?></textarea>
                                 <small>Inserisci il tuo CSS personalizzato. Usa con cautela!</small>
                             </div>
-                        </div>
+                            </div>
 
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Salva Impostazioni
-                            </button>
-                            <a href="profile.php?user=<?php echo htmlspecialchars($user['username']); ?>" target="_blank" class="btn btn-outline">
-                                <i class="fas fa-eye"></i> Anteprima
-                            </a>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Salva Impostazioni
+                                </button>
+                                <a href="profile.php?user=<?php echo htmlspecialchars($user['username']); ?>" target="_blank" class="btn btn-outline">
+                                    <i class="fas fa-external-link-alt"></i> Apri in nuova scheda
+                                </a>
+                            </div>
+                        </form>
                         </div>
-                    </form>
+                        <div class="customize-preview">
+                            <div class="preview-header">
+                                <h3><i class="fas fa-desktop"></i> Anteprima Live</h3>
+                                <button type="button" class="btn btn-secondary btn-sm" id="refreshPreviewBtn">
+                                    <i class="fas fa-sync-alt"></i> Aggiorna
+                                </button>
+                            </div>
+                            <iframe
+                                id="profilePreview"
+                                class="preview-frame"
+                                src="profile.php?user=<?php echo htmlspecialchars($user['username']); ?>&preview=1"
+                                title="Anteprima profilo"></iframe>
+                            <p class="preview-hint">
+                                L'anteprima si aggiorna automaticamente quando modifichi i campi.
+                            </p>
+                        </div>
+                    </div>
                     
                     <script>
+                        const previewBaseUrl = <?php echo json_encode('profile.php?user=' . urlencode($user['username']) . '&preview=1'); ?>;
+                        
                         // Gestione opzioni background dinamiche
                         document.addEventListener('DOMContentLoaded', function() {
                             const backgroundType = document.getElementById('background_type');
                             const gradientOptions = document.getElementById('gradient-options');
                             const colorOptions = document.getElementById('color-options');
                             const imageOptions = document.getElementById('image-options');
+                            const templateForm = document.getElementById('template-form');
+                            const autoSaveStatus = document.getElementById('autoSaveStatus');
+                            const previewFrame = document.getElementById('profilePreview');
+                            const refreshPreviewBtn = document.getElementById('refreshPreviewBtn');
+                            let autoSaveTimeout = null;
+                            let previewTimeout = null;
                             
                             function updateBackgroundOptions() {
                                 const type = backgroundType.value;
@@ -1313,12 +1413,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     radio.closest('.gradient-option').classList.add('active');
                                 });
                             });
+                            
+                            function setAutoSaveStatus(message, state = 'success') {
+                                if (!autoSaveStatus) return;
+                                autoSaveStatus.textContent = message;
+                                autoSaveStatus.classList.remove('saving', 'error');
+                                if (state === 'saving') {
+                                    autoSaveStatus.classList.add('saving');
+                                } else if (state === 'error') {
+                                    autoSaveStatus.classList.add('error');
+                                }
+                            }
+                            
+                            function reloadPreview() {
+                                if (!previewFrame) return;
+                                const separator = previewBaseUrl.includes('?') ? '&' : '?';
+                                previewFrame.src = previewBaseUrl + separator + 'ts=' + Date.now();
+                            }
+                            
+                            function queuePreviewReload() {
+                                if (!previewFrame) return;
+                                clearTimeout(previewTimeout);
+                                previewTimeout = setTimeout(reloadPreview, 300);
+                            }
+                            
+                            function queueAutoSave() {
+                                if (!templateForm) return;
+                                clearTimeout(autoSaveTimeout);
+                                setAutoSaveStatus('Salvataggio in corso...', 'saving');
+                                autoSaveTimeout = setTimeout(() => {
+                                    const formData = new FormData(templateForm);
+                                    formData.append('ajax', '1');
+                                    
+                                    fetch('ajax/update_template.php', {
+                                        method: 'POST',
+                                        body: formData,
+                                        credentials: 'same-origin'
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            setAutoSaveStatus('Modifiche salvate');
+                                            queuePreviewReload();
+                                        } else {
+                                            setAutoSaveStatus(data.message || 'Errore durante il salvataggio', 'error');
+                                        }
+                                    })
+                                    .catch(() => {
+                                        setAutoSaveStatus('Errore di rete', 'error');
+                                    });
+                                }, 500);
+                            }
+                            
+                            if (templateForm) {
+                                const inputs = templateForm.querySelectorAll('input, select, textarea');
+                                inputs.forEach(input => {
+                                    const eventName = (input.tagName === 'SELECT' || input.type === 'radio' || input.type === 'checkbox') ? 'change' : 'input';
+                                    input.addEventListener(eventName, queueAutoSave);
+                                });
+                            }
+                            
+                            if (refreshPreviewBtn) {
+                                refreshPreviewBtn.addEventListener('click', reloadPreview);
+                            }
                         });
                     </script>
                 </div>
 
                 <!-- Tab Impostazioni -->
-                <div id="settings-tab" class="tab-content">
+                <div id="settings-tab" class="tab-content <?php echo $active_tab === 'settings' ? 'active' : ''; ?>">
                     <div class="settings-section">
                         <div class="section-header">
                             <h2><i class="fas fa-cog"></i> Impostazioni</h2>
@@ -1541,8 +1704,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script src="assets/js/script.js"></script>
     <script>
+        const initialTab = '<?php echo $active_tab; ?>';
+        
         // Gestione tab del dashboard
-        function showTab(tabName) {
+        function showTab(tabName, element = null) {
             // Nascondi tutti i tab
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
@@ -1554,16 +1719,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
             
             // Mostra il tab selezionato
-            document.getElementById(tabName + '-tab').classList.add('active');
+            const content = document.getElementById(tabName + '-tab');
+            if (content) {
+                content.classList.add('active');
+            }
             
             // Attiva il nav-tab selezionato
-            event.target.classList.add('active');
+            if (element) {
+                element.classList.add('active');
+            } else {
+                const navButton = document.querySelector(`.nav-tab[data-tab="${tabName}"]`);
+                if (navButton) {
+                    navButton.classList.add('active');
+                }
+            }
         }
         
         // Inizializzazione
         document.addEventListener('DOMContentLoaded', function() {
-            // Imposta il tab attivo di default
-            showTab('overview');
+            showTab(initialTab || 'overview');
         });
     </script>
 </body>
