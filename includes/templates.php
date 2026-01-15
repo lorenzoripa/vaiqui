@@ -17,7 +17,7 @@ function getAvailableTemplates() {
         'gradient' => [
             'name' => 'Gradient',
             'description' => 'Sfondo con gradienti colorati',
-            'preview' => 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            'preview' => 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)'
         ],
         'dark' => [
             'name' => 'Dark',
@@ -37,7 +37,7 @@ function getAvailableTemplates() {
         'ocean' => [
             'name' => 'Ocean',
             'description' => 'Tema ispirato all\'oceano',
-            'preview' => 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            'preview' => 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)'
         ],
         'sunset' => [
             'name' => 'Sunset',
@@ -57,7 +57,7 @@ function getAvailableTemplates() {
         'modern' => [
             'name' => 'Modern',
             'description' => 'Design moderno e pulito',
-            'preview' => 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            'preview' => 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)'
         ],
         'vibrant' => [
             'name' => 'Vibrant',
@@ -131,7 +131,7 @@ function getTemplateCSS($template, $user_settings) {
     } elseif ($background_type === 'color') {
         $background_css = "background-color: " . ($user_settings['background_color'] ?? '#667eea') . ";";
     } else {
-        $gradient = $user_settings['background_gradient'] ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        $gradient = $user_settings['background_gradient'] ?? 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)';
         $background_css = "background: " . $gradient . ";";
     }
     
@@ -175,7 +175,7 @@ function getTemplateCSS($template, $user_settings) {
             break;
             
         case 'ocean':
-            $background_css = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);";
+            $background_css = "background: linear-gradient(135deg, #667eea 0%, #ff8c42 100%);";
             break;
             
         case 'sunset':
@@ -297,14 +297,14 @@ function getTemplateCSS($template, $user_settings) {
 // Gradienti predefiniti
 function getPresetGradients() {
     return [
-        'purple' => 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'purple' => 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)',
         'blue' => 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
         'pink' => 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
         'green' => 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
         'orange' => 'linear-gradient(135deg, #f5af19 0%, #f12711 100%)',
         'dark' => 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
         'sunset' => 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        'ocean' => 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'ocean' => 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)',
         'forest' => 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)',
         'royal' => 'linear-gradient(135deg, #f5af19 0%, #f12711 100%)'
     ];

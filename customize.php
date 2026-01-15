@@ -170,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             <div class="color-input">
                                 <label for="secondary_color">Colore Secondario</label>
                                 <input type="color" id="secondary_color" name="secondary_color" 
-                                       value="<?php echo $customization['secondary_color'] ?? '#764ba2'; ?>">
+                                       value="<?php echo $customization['secondary_color'] ?? '#ff8c42'; ?>">
                             </div>
                             <div class="color-input">
                                 <label for="text_color">Colore Testo</label>
@@ -190,8 +190,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             <div class="color-input">
                                 <label for="background_color">Colore Sfondo</label>
                                 <input type="text" id="background_color" name="background_color" 
-                                       value="<?php echo $customization['background_color'] ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; ?>"
-                                       placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+                                       value="<?php echo $customization['background_color'] ?? 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)'; ?>"
+                                       placeholder="linear-gradient(135deg, #667eea 0%, #ff8c42 100%)">
                                 <small>Puoi usare colori esadecimali (#667eea) o gradienti CSS</small>
                             </div>
                         </div>
@@ -304,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             color: ${formData.get('button_text_color') || '#333'};
                             border-radius: ${formData.get('border_radius') || 12}px;
                         ">
-                            <div class="profile-link-icon" style="background: ${formData.get('secondary_color') || '#764ba2'};">
+                            <div class="profile-link-icon" style="background: ${formData.get('secondary_color') || '#ff8c42'};">
                                 <i class="fas fa-link"></i>
                             </div>
                             <div class="profile-link-title">Esempio Link</div>
@@ -369,9 +369,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             const themes = {
                 'default': {
                     primary_color: '#667eea',
-                    secondary_color: '#764ba2',
+                    secondary_color: '#ff8c42',
                     text_color: '#ffffff',
-                    background_color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background_color: 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)',
                     button_color: '#f8f9fa',
                     button_text_color: '#333'
                 },

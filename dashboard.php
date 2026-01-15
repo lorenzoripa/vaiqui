@@ -1179,7 +1179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="gradients-grid">
                                         <?php 
                                         $gradients = getPresetGradients();
-                                        $current_gradient = $user['background_gradient'] ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                                        $current_gradient = $user['background_gradient'] ?? 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)';
                                         foreach ($gradients as $name => $gradient): 
                                         ?>
                                             <label class="gradient-option <?php echo $current_gradient === $gradient ? 'active' : ''; ?>">

@@ -73,7 +73,7 @@ if (isset($_GET['click']) && is_numeric($_GET['click'])) {
         'template' => $template,
         'background_type' => $profile['background_type'] ?? 'gradient',
         'background_color' => $profile['background_color'] ?? '#667eea',
-        'background_gradient' => $profile['background_gradient'] ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'background_gradient' => $profile['background_gradient'] ?? 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)',
         'background_image' => $profile['background_image'] ?? null,
         'text_color' => $profile['text_color'] ?? '#ffffff',
         'link_style' => $profile['link_style'] ?? 'card',

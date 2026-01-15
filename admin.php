@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <link href="assets/css/style.css" rel="stylesheet">
     <style>
         .admin-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #ff8c42 100%);
             color: white;
             padding: 30px;
             border-radius: 15px;

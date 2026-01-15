@@ -95,7 +95,7 @@ if (isset($_SESSION['user_id'])) {
         /* Hero Section */
         .hero {
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #ff8c42 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -355,7 +355,7 @@ if (isset($_SESSION['user_id'])) {
         }
 
         .demo-image {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #ff8c42 100%);
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.2);
@@ -371,7 +371,7 @@ if (isset($_SESSION['user_id'])) {
         /* Stats Section */
         .stats {
             padding: 80px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #ff8c42 100%);
             color: white;
         }
 
@@ -431,7 +431,7 @@ if (isset($_SESSION['user_id'])) {
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #ff8c42 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -510,7 +510,7 @@ if (isset($_SESSION['user_id'])) {
         /* CTA Section */
         .cta-section {
             padding: 100px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #ff8c42 100%);
             text-align: center;
             color: white;
         }

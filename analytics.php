@@ -256,7 +256,7 @@ try {
                 datasets: [{
                     label: 'Click',
                     data: hourlyData.map(item => item.clicks),
-                    backgroundColor: '#764ba2'
+                    backgroundColor: '#ff8c42'
                 }]
             },
             options: {
@@ -282,7 +282,7 @@ try {
                 labels: deviceData.map(item => item.device_type),
                 datasets: [{
                     data: deviceData.map(item => item.clicks),
-                    backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c']
+                    backgroundColor: ['#667eea', '#ff8c42', '#f093fb', '#f5576c']
                 }]
             },
             options: {

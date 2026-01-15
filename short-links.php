@@ -328,7 +328,7 @@ foreach ($short_links as $link) {
                     labels: data.map(item => item.device_type),
                     datasets: [{
                         data: data.map(item => item.clicks),
-                        backgroundColor: ['#667eea', '#764ba2', '#f093fb']
+                        backgroundColor: ['#667eea', '#ff8c42', '#f093fb']
                     }]
                 },
                 options: {

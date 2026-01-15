@@ -121,7 +121,7 @@ CREATE INDEX idx_verification_token ON users(verification_token);
 ALTER TABLE users ADD COLUMN template VARCHAR(50) DEFAULT 'default';
 ALTER TABLE users ADD COLUMN background_type VARCHAR(20) DEFAULT 'gradient';
 ALTER TABLE users ADD COLUMN background_color VARCHAR(7) DEFAULT '#667eea';
-ALTER TABLE users ADD COLUMN background_gradient VARCHAR(200) DEFAULT 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+ALTER TABLE users ADD COLUMN background_gradient VARCHAR(200) DEFAULT 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)';
 ALTER TABLE users ADD COLUMN background_image VARCHAR(255) DEFAULT NULL;
 ALTER TABLE users ADD COLUMN text_color VARCHAR(7) DEFAULT '#ffffff';
 ALTER TABLE users ADD COLUMN link_style VARCHAR(50) DEFAULT 'card';

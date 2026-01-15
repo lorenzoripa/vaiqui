@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <link href="assets/css/style.css" rel="stylesheet">
     <style>
         .hero-mini {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #ff8c42 100%);
             padding: 60px 20px;
             text-align: center;
             color: white;

@@ -75,12 +75,12 @@ function generateCustomCSS($customization) {
     <style>
     .profile-page {
         font-family: " . ($customization['font_family'] ?: 'inherit') . ";
-        background: " . ($customization['background_color'] ?: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)') . ";
+        background: " . ($customization['background_color'] ?: 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)') . ";
         color: " . ($customization['text_color'] ?: 'white') . ";
     }
     
     .profile-header {
-        background: " . ($customization['primary_color'] ?: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)') . ";
+        background: " . ($customization['primary_color'] ?: 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)') . ";
     }
     
     .profile-link {
@@ -110,8 +110,8 @@ function getAvailableThemes() {
         'default' => [
             'name' => 'Default',
             'primary_color' => '#667eea',
-            'secondary_color' => '#764ba2',
-            'background_color' => 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'secondary_color' => '#ff8c42',
+            'background_color' => 'linear-gradient(135deg, #667eea 0%, #ff8c42 100%)',
             'text_color' => 'white',
             'button_color' => '#f8f9fa',
             'button_text_color' => '#333'
