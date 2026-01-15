@@ -165,24 +165,14 @@ if (isset($_GET['click']) && is_numeric($_GET['click'])) {
                 <?php endif; ?>
             </div>
             
-            <?php if (!empty($profile['address']) && $profile['show_map']): ?>
+            <?php if (!empty($profile['address'])): ?>
                 <div class="profile-address">
                     <h3><i class="fas fa-map-marker-alt"></i> Dove Trovarci</h3>
                     <p class="address-text"><?php echo nl2br(htmlspecialchars($profile['address'])); ?></p>
                     
-                    <?php if (!empty($profile['latitude']) && !empty($profile['longitude'])): ?>
+                    <?php if (!empty($profile['latitude']) && !empty($profile['longitude']) && !empty($profile['show_map'])): ?>
                         <div id="map" class="profile-map"></div>
                     <?php endif; ?>
-                </div>
-            <?php elseif (!empty($profile['address'])): ?>
-                <!-- Debug: indirizzo presente ma mappa disattivata -->
-                <div class="profile-address" style="background: #fff3cd; border: 1px solid #ffc107;">
-                    <h3><i class="fas fa-map-marker-alt"></i> Dove Trovarci</h3>
-                    <p class="address-text"><?php echo nl2br(htmlspecialchars($profile['address'])); ?></p>
-                    <small style="color: #856404;">
-                        <i class="fas fa-info-circle"></i> 
-                        Mappa disattivata nelle impostazioni
-                    </small>
                 </div>
             <?php endif; ?>
             

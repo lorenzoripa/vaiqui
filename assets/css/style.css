@@ -780,6 +780,67 @@ body.theme-landing.profile-body .social-link:hover {
     color: #0f172a;
 }
 
+/* Profile: social + footer (coerente con landing) */
+body.theme-landing.profile-body .profile-social {
+    margin: 24px 20px;
+    padding: 18px;
+    border-radius: 16px;
+}
+
+body.theme-landing.profile-body .profile-social h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255,255,255,0.95);
+}
+
+body.theme-landing.profile-body .social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+body.theme-landing.profile-body .social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.theme-landing.profile-body .social-link i {
+    font-size: 1.15rem;
+}
+
+body.theme-landing.profile-body .social-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+}
+
+body.theme-landing.profile-body .profile-footer {
+    text-align: center;
+    padding: 22px 10px 10px;
+    color: rgba(255,255,255,0.78);
+    font-size: 0.95rem;
+}
+
+body.theme-landing.profile-body .empty-profile {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255,255,255,0.85);
+}
+
+body.theme-landing.profile-body .empty-profile i {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
