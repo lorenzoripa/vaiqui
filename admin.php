@@ -10,6 +10,11 @@ if (!isset($_SESSION['user_id']) || !isAdmin($_SESSION['user_id'])) {
 }
 
 $admin_user = getUser($_SESSION['user_id']);
+$is_verified = $admin_user && !empty($admin_user['email_verified']);
+if (!$is_verified) {
+    header('Location: auth.php?verify=1');
+    exit();
+}
 $stats = getAdminStats();
 
 // Gestione paginazione e ricerca

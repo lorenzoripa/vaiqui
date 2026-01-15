@@ -11,6 +11,11 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user = getUser($_SESSION['user_id']);
+$is_verified = $user && !empty($user['email_verified']);
+if (!$is_verified) {
+    header('Location: auth.php?verify=1');
+    exit();
+}
 $short_links = getUserShortLinks($_SESSION['user_id']);
 
 // Gestione delle azioni

@@ -53,6 +53,29 @@ function loginUser($email, $password) {
     }
 }
 
+// Login con stato (ok / unverified / invalid)
+function loginUserWithStatus($email, $password) {
+    global $pdo;
+
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user || !password_verify($password, $user['password'])) {
+            return ['status' => 'invalid', 'user' => null];
+        }
+
+        if (empty($user['email_verified'])) {
+            return ['status' => 'unverified', 'user' => $user];
+        }
+
+        return ['status' => 'ok', 'user' => $user];
+    } catch (PDOException $e) {
+        return ['status' => 'invalid', 'user' => null];
+    }
+}
+
 // Funzione per ottenere i dati dell'utente
 function getUser($user_id) {
     global $pdo;
@@ -987,6 +1010,30 @@ function resendVerificationEmail($user_id) {
     } catch (PDOException $e) {
         error_log("Errore resendVerificationEmail: " . $e->getMessage());
         return ['success' => false, 'message' => 'Errore durante la rigenerazione del token'];
+    }
+}
+
+// Reinvia email di verifica partendo dall'email (utile quando l'utente non è loggato)
+function resendVerificationEmailByEmail($email) {
+    global $pdo;
+
+    try {
+        $stmt = $pdo->prepare("SELECT id, email_verified FROM users WHERE email = ?");
+        $stmt->execute([trim($email)]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user) {
+            return ['success' => false, 'message' => 'Email non trovata'];
+        }
+
+        if (!empty($user['email_verified'])) {
+            return ['success' => false, 'message' => 'Email già verificata'];
+        }
+
+        return resendVerificationEmail((int)$user['id']);
+    } catch (PDOException $e) {
+        error_log("Errore resendVerificationEmailByEmail: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Errore durante la richiesta'];
     }
 }
 ?>

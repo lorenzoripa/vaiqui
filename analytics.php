@@ -10,6 +10,10 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user = getUser($_SESSION['user_id']);
+if (!$user || empty($user['email_verified'])) {
+    header('Location: auth.php?verify=1');
+    exit();
+}
 
 // Ottieni statistiche generali
 $stats = getUserStats($_SESSION['user_id']);

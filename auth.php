@@ -4,10 +4,14 @@ require_once 'config/database.php';
 require_once 'includes/functions.php';
 require_once 'includes/social_login.php';
 
-// Se l'utente è loggato, reindirizza al dashboard
+// Se l'utente è loggato e verificato, reindirizza al dashboard
+$logged_user = null;
 if (isset($_SESSION['user_id'])) {
-    header('Location: dashboard.php');
-    exit();
+    $logged_user = getUser($_SESSION['user_id']);
+    if ($logged_user && !empty($logged_user['email_verified'])) {
+        header('Location: dashboard.php');
+        exit();
+    }
 }
 
 // Gestione del login
@@ -16,12 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $email = trim($_POST['email']);
         $password = $_POST['password'];
         
-        $user = loginUser($email, $password);
-        if ($user) {
+        $login = loginUserWithStatus($email, $password);
+        if ($login['status'] === 'ok' && !empty($login['user'])) {
+            $user = $login['user'];
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             header('Location: dashboard.php');
             exit();
+        } elseif ($login['status'] === 'unverified') {
+            $error = "Email non verificata. Controlla la posta e clicca sul link di conferma.";
+            $unverified_email = $email;
         } else {
             $error = "Credenziali non valide";
         }
@@ -40,6 +48,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $email_sent = true;
             } else {
                 $error = $result;
+            }
+        }
+    } elseif ($_POST['action'] === 'resend_verification') {
+        $email = trim($_POST['email'] ?? '');
+        if ($email === '') {
+            $error = "Inserisci un'email valida";
+        } else {
+            $result = resendVerificationEmailByEmail($email);
+            if (!empty($result['success'])) {
+                $success = $result['message'];
+            } else {
+                $error = $result['message'] ?? "Errore durante l'invio";
             }
         }
     }
@@ -86,6 +106,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 </div>
             <?php endif; ?>
 
+            <?php if ($logged_user && empty($logged_user['email_verified'])): ?>
+                <div class="alert alert-error" style="background:#fff3cd;border:1px solid #ffc107;color:#856404;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Email non verificata: per continuare devi confermare l'email dal link ricevuto.
+                </div>
+            <?php endif; ?>
+
             <div class="auth-tabs">
                 <button class="tab-btn active" onclick="showTab('login')">Login</button>
                 <button class="tab-btn" onclick="showTab('register')">Registrati</button>
@@ -96,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <input type="hidden" name="action" value="login">
                 <div class="form-group">
                     <label for="login-email">Email</label>
-                    <input type="email" id="login-email" name="email" required>
+                    <input type="email" id="login-email" name="email" required value="<?php echo htmlspecialchars($unverified_email ?? ''); ?>">
                 </div>
                 <div class="form-group">
                     <label for="login-password">Password</label>
@@ -104,6 +131,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 </div>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-sign-in-alt"></i> Accedi
+                </button>
+            </form>
+
+            <!-- Reinvia email verifica -->
+            <form method="POST" style="padding: 0 30px 20px;">
+                <input type="hidden" name="action" value="resend_verification">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label for="resend-email">Non hai ricevuto l'email di verifica?</label>
+                    <input type="email" id="resend-email" name="email" placeholder="La tua email" value="<?php echo htmlspecialchars($unverified_email ?? ''); ?>" required>
+                </div>
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-paper-plane"></i> Reinvia email di verifica
                 </button>
             </form>
 

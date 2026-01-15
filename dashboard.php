@@ -121,6 +121,11 @@ function handleAvatarUpload(array $file, int $userId): array {
 }
 
 $user = getUser($_SESSION['user_id']);
+$is_verified = $user && !empty($user['email_verified']);
+if (!$is_verified) {
+    header('Location: auth.php?verify=1');
+    exit();
+}
 $links = getUserLinks($_SESSION['user_id']);
 $stats = getUserStats($_SESSION['user_id']);
 $short_links = getUserShortLinks($_SESSION['user_id']);
