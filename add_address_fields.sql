@@ -5,10 +5,11 @@
 -- per la funzionalità di indirizzo e mappa interattiva
 
 -- Aggiungi colonne per indirizzo e mappa alla tabella users
-ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT DEFAULT NULL;
-ALTER TABLE users ADD COLUMN IF NOT EXISTS show_map BOOLEAN DEFAULT FALSE;
-ALTER TABLE users ADD COLUMN IF NOT EXISTS latitude DECIMAL(10, 8) DEFAULT NULL;
-ALTER TABLE users ADD COLUMN IF NOT EXISTS longitude DECIMAL(11, 8) DEFAULT NULL;
+-- NOTA: Se le colonne esistono già, MySQL genererà un errore che puoi ignorare
+ALTER TABLE users ADD COLUMN address TEXT DEFAULT NULL;
+ALTER TABLE users ADD COLUMN show_map BOOLEAN DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN latitude DECIMAL(10, 8) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN longitude DECIMAL(11, 8) DEFAULT NULL;
 
 -- Verifica che le colonne siano state aggiunte correttamente
 SELECT 
