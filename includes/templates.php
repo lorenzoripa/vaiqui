@@ -4,11 +4,6 @@
 // Template disponibili
 function getAvailableTemplates() {
     return [
-        'linktree' => [
-            'name' => 'Linktree',
-            'description' => 'Stile Linktree: pulito, centrato, bottoni moderni',
-            'preview' => '#ffffff'
-        ],
         'default' => [
             'name' => 'Default',
             'description' => 'Template classico e pulito',
@@ -145,14 +140,6 @@ function getTemplateCSS($template, $user_settings) {
     
     // Template specifico
     switch ($template) {
-        case 'linktree':
-            // Base neutra: il look & feel specifico è gestito dal CSS (scoped su body.template-linktree)
-            // Qui lasciamo che il background (anche personalizzato) e i font vengano applicati normalmente.
-            $css .= "
-                body.profile-body.template-linktree { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-            ";
-            break;
-
         case 'minimal':
             $css .= "
                 .profile-page, body.profile-body { background: #f8f9fa; color: #1a1a1a; }
