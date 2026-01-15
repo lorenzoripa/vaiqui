@@ -20,6 +20,16 @@ if (!is_dir(LINK_IMAGE_DIR)) {
     @mkdir(LINK_IMAGE_DIR, 0755, true);
 }
 
+// === Configurazione upload avatar ===
+const AVATAR_DIR = __DIR__ . '/uploads/avatars/';
+const AVATAR_BASE_PATH = 'uploads/avatars/';
+const AVATAR_MAX_SIZE = 1024 * 1024; // 1MB
+const AVATAR_ALLOWED_MIME = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+
+if (!is_dir(AVATAR_DIR)) {
+    @mkdir(AVATAR_DIR, 0755, true);
+}
+
 function isLocalLinkImage(?string $path = null): bool {
     if (!$path) {
         return false;
@@ -63,6 +73,51 @@ function handleLinkImageUpload(array $file, int $userId): array {
     }
 
     return ['path' => LINK_IMAGE_BASE_PATH . $filename, 'error' => null];
+}
+
+function isLocalAvatar(?string $path = null): bool {
+    if (!$path) {
+        return false;
+    }
+    return strpos($path, AVATAR_BASE_PATH) === 0;
+}
+
+function deleteAvatarIfLocal(?string $path): void {
+    if ($path && isLocalAvatar($path)) {
+        $abs = AVATAR_DIR . basename($path);
+        if (is_file($abs)) {
+            @unlink($abs);
+        }
+    }
+}
+
+function handleAvatarUpload(array $file, int $userId): array {
+    if (empty($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        return ['path' => null, 'error' => null];
+    }
+
+    if (($file['size'] ?? 0) > AVATAR_MAX_SIZE) {
+        return ['path' => null, 'error' => 'Avatar troppo grande (max 1MB)'];
+    }
+
+    $tmpName = $file['tmp_name'];
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = finfo_file($finfo, $tmpName) ?: '';
+    finfo_close($finfo);
+
+    if (!isset(AVATAR_ALLOWED_MIME[$mime])) {
+        return ['path' => null, 'error' => 'Formato avatar non valido (solo JPG, PNG o WebP)'];
+    }
+
+    $extension = AVATAR_ALLOWED_MIME[$mime];
+    $filename = 'avatar_' . $userId . '_' . uniqid('', true) . '.' . $extension;
+    $destination = AVATAR_DIR . $filename;
+
+    if (!move_uploaded_file($tmpName, $destination)) {
+        return ['path' => null, 'error' => 'Errore durante il salvataggio dell\'avatar'];
+    }
+
+    return ['path' => AVATAR_BASE_PATH . $filename, 'error' => null];
 }
 
 $user = getUser($_SESSION['user_id']);
@@ -198,11 +253,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'update_profile':
                 $display_name = trim($_POST['display_name']);
                 $bio = trim($_POST['bio']);
-                
-                if (updateProfile($_SESSION['user_id'], $display_name, $bio)) {
-                    $success = "Profilo aggiornato con successo!";
+
+                $remove_avatar_requested = isset($_POST['remove_avatar']) && $_POST['remove_avatar'] === '1';
+
+                // Avatar corrente (per eventuale sostituzione/rimozione)
+                $stmt = $pdo->prepare("SELECT avatar FROM users WHERE id = ?");
+                $stmt->execute([$_SESSION['user_id']]);
+                $currentAvatar = $stmt->fetch(PDO::FETCH_ASSOC)['avatar'] ?? null;
+
+                $uploadResult = handleAvatarUpload($_FILES['avatar_file'] ?? [], $_SESSION['user_id']);
+                if ($uploadResult['error']) {
+                    $error = $uploadResult['error'];
+                    break;
+                }
+
+                if ($uploadResult['path']) {
+                    // Se sostituisco, elimina il vecchio avatar se locale
+                    deleteAvatarIfLocal($currentAvatar);
+                    if (updateProfile($_SESSION['user_id'], $display_name, $bio, $uploadResult['path'])) {
+                        $success = "Profilo aggiornato con successo!";
+                    } else {
+                        deleteAvatarIfLocal($uploadResult['path']);
+                        $error = "Errore durante l'aggiornamento del profilo";
+                    }
                 } else {
-                    $error = "Errore durante l'aggiornamento del profilo";
+                    if (updateProfile($_SESSION['user_id'], $display_name, $bio)) {
+                        // Rimozione esplicita avatar senza upload
+                        if ($remove_avatar_requested) {
+                            deleteAvatarIfLocal($currentAvatar);
+                            if (!updateUserAvatar($_SESSION['user_id'], null)) {
+                                $error = "Errore durante la rimozione dell'avatar";
+                                break;
+                            }
+                        }
+                        $success = "Profilo aggiornato con successo!";
+                    } else {
+                        $error = "Errore durante l'aggiornamento del profilo";
+                    }
                 }
                 break;
 
@@ -1036,8 +1123,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <h2><i class="fas fa-user"></i> Gestione Profilo</h2>
                         </div>
                         
-                        <form method="POST" class="profile-form">
+                        <form method="POST" class="profile-form" enctype="multipart/form-data">
                             <input type="hidden" name="action" value="update_profile">
+                            <div class="form-group">
+                                <label for="avatar_file">Foto profilo</label>
+                                <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+                                    <?php
+                                        $current_avatar = $user['avatar'] ?? null;
+                                        $current_avatar_url = $user['avatar_url'] ?? null;
+                                        $avatar_src = $current_avatar ?: $current_avatar_url;
+                                    ?>
+                                    <img
+                                        id="avatarPreviewProfile"
+                                        src="<?php echo $avatar_src ? htmlspecialchars($avatar_src) : ''; ?>"
+                                        alt="Avatar"
+                                        style="width:72px;height:72px;border-radius:50%;object-fit:cover;<?php echo $avatar_src ? '' : 'display:none;'; ?>"
+                                    >
+                                    <input
+                                        type="file"
+                                        id="avatar_file"
+                                        name="avatar_file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        onchange="handleAvatarUpload(this)"
+                                        data-preview-id="avatarPreviewProfile"
+                                    >
+                                    <label style="display:flex; align-items:center; gap:8px; margin:0;">
+                                        <input type="checkbox" name="remove_avatar" value="1">
+                                        Rimuovi foto
+                                    </label>
+                                    <small style="color:#666;">JPG/PNG/WebP, max 1MB</small>
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label for="display_name">Nome Visualizzato</label>
                                 <input type="text" id="display_name" name="display_name" 

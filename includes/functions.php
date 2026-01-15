@@ -142,6 +142,19 @@ function updateProfile($user_id, $display_name, $bio, $avatar = null) {
     }
 }
 
+// Aggiorna solo l'avatar utente (accetta anche NULL per rimozione)
+function updateUserAvatar($user_id, $avatar) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("UPDATE users SET avatar = ? WHERE id = ?");
+        $stmt->execute([$avatar, $user_id]);
+        return true;
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
 // Aggiorna impostazioni template e personalizzazione
 function updateTemplateSettings($user_id, $settings) {
     global $pdo;
@@ -297,7 +310,8 @@ function getPublicProfile($username) {
     global $pdo;
     
     try {
-        $stmt = $pdo->prepare("SELECT id, username, display_name, bio, avatar, theme, address, show_map, latitude, longitude, social_instagram, social_facebook, social_tiktok, social_twitter, social_linkedin, social_youtube, template, background_type, background_color, background_gradient, background_image, text_color, link_style, link_color, link_hover_color, button_border_radius, button_shadow, font_family, profile_layout, show_social_icons, custom_css FROM users WHERE username = ?");
+        // Usa avatar caricato manualmente se presente, altrimenti avatar_url (es. Google)
+        $stmt = $pdo->prepare("SELECT id, username, display_name, bio, COALESCE(avatar, avatar_url) AS avatar, theme, address, show_map, latitude, longitude, social_instagram, social_facebook, social_tiktok, social_twitter, social_linkedin, social_youtube, template, background_type, background_color, background_gradient, background_image, text_color, link_style, link_color, link_hover_color, button_border_radius, button_shadow, font_family, profile_layout, show_social_icons, custom_css FROM users WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         

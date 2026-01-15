@@ -285,7 +285,8 @@ function handleAvatarUpload(input) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const preview = document.getElementById('avatarPreview');
+            const previewId = (input.dataset && input.dataset.previewId) ? input.dataset.previewId : 'avatarPreview';
+            const preview = document.getElementById(previewId);
             if (preview) {
                 preview.src = e.target.result;
                 preview.style.display = 'block';
