@@ -599,7 +599,7 @@ if (isset($_SESSION['user_id'])) {
         }
     </style>
 </head>
-<body>
+<body class="theme-landing landing-page">
     <!-- Header -->
     <header class="header">
         <div class="header-content">

@@ -117,7 +117,7 @@ try {
     <link href="assets/css/style.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 </head>
-<body>
+<body class="theme-landing dashboard-page">
     <div class="container">
         <div class="dashboard">
             <div class="dashboard-header">

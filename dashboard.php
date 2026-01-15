@@ -20,7 +20,7 @@ if (!is_dir(LINK_IMAGE_DIR)) {
     @mkdir(LINK_IMAGE_DIR, 0755, true);
 }
 
-function isLocalLinkImage(string $path = null): bool {
+function isLocalLinkImage(?string $path = null): bool {
     if (!$path) {
         return false;
     }
@@ -293,7 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Dashboard - VaiQui</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
-    <style>
+    <style media="not all">
         /* Stili per la sezione Personalizzazione */
         .customize-section {
             background: white;
@@ -629,7 +629,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
-<body>
+<body class="theme-landing dashboard-page">
     <div class="container">
         <div class="dashboard">
             <div class="dashboard-header">

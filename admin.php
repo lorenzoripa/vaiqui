@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <title>Area Amministrativa - VaiQui</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
-    <style>
+    <style media="not all">
         .admin-header {
             background: linear-gradient(135deg, #667eea 0%, #ff8c42 100%);
             color: white;
@@ -298,7 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
     </style>
 </head>
-<body>
+<body class="theme-landing dashboard-page admin-page">
     <div class="container">
         <div class="dashboard">
             <div class="admin-header">
@@ -534,7 +534,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         });
     </script>
 
-    <style>
+    <style media="not all">
         .modal {
             display: none;
             position: fixed;

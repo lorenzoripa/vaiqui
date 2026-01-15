@@ -35,7 +35,7 @@ if (empty($token)) {
     <title>Verifica Email - VaiQui</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
-    <style>
+    <style media="not all">
         .verification-container {
             max-width: 500px;
             margin: 100px auto;
@@ -71,7 +71,7 @@ if (empty($token)) {
         }
     </style>
 </head>
-<body>
+<body class="theme-landing auth-page">
     <div class="container">
         <div class="verification-container">
             <?php if ($success): ?>

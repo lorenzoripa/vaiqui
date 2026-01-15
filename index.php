@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <title>VaiQui - Il tuo Linktree personale</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
-    <style>
+    <style media="not all">
         .hero-mini {
             background: linear-gradient(135deg, #667eea 0%, #ff8c42 100%);
             padding: 60px 20px;
@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
     </style>
 </head>
-<body>
+<body class="theme-landing auth-page">
     <!-- Mini Hero Section -->
     <section class="hero-mini">
         <h1><i class="fas fa-link"></i> VaiQui</h1>

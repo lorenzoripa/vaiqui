@@ -92,115 +92,23 @@ if (isset($_GET['click']) && is_numeric($_GET['click'])) {
     
     <style>
         <?php echo $template_css; ?>
-        
-        /* Stili aggiuntivi per il profilo */
-        .profile-body {
-            margin: 0;
-            min-height: 100vh;
+
+        /* Micro-animazione ingresso link */
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
         }
-        
-        .profile-page {
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-        
-        .profile-container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .profile-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            margin-bottom: 20px;
-        }
-        
-        .profile-avatar-placeholder {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 3rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-        
-        .profile-name {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        
-        .profile-bio {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-        
-        .profile-links {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .profile-link {
-            display: block;
-            padding: 20px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .profile-link-image {
-            min-height: 200px;
-            background-size: cover;
-            background-position: center;
-        }
-        
-        .profile-link-image-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .profile-link-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-        }
-        
-        .profile-link-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: white;
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
-<body class="profile-body">
+<body class="profile-body theme-landing">
     <div class="container">
         <div class="profile-page theme-<?php echo htmlspecialchars($profile['theme']); ?>">
             <div class="profile-header">
@@ -382,96 +290,5 @@ if (isset($_GET['click']) && is_numeric($_GET['click'])) {
             });
         });
     </script>
-    
-    <style>
-        .profile-avatar-placeholder {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 4px solid white;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.2);
-            font-size: 2rem;
-        }
-        
-        .empty-profile {
-            text-align: center;
-            padding: 40px 20px;
-            color: #666;
-        }
-        
-        .empty-profile i {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        
-        .profile-footer {
-            text-align: center;
-            padding: 20px;
-            color: #999;
-            font-size: 0.9rem;
-        }
-
-        .profile-social {
-            margin: 30px 20px;
-            padding: 20px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 15px;
-            backdrop-filter: blur(6px);
-        }
-
-        .profile-social h3 {
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .social-links {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
-        }
-
-        .social-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            background: rgba(0,0,0,0.2);
-            color: inherit;
-            text-decoration: none;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .social-link i {
-            font-size: 1.2rem;
-        }
-
-        .social-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            color: inherit;
-        }
-        
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease-out forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
 </body>
 </html>
