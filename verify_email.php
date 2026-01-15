@@ -80,7 +80,7 @@ if (empty($token)) {
                 </div>
                 <h1>Email Verificata!</h1>
                 <p><?php echo htmlspecialchars($message); ?></p>
-                <a href="index.php" class="btn btn-primary">
+                <a href="auth.php" class="btn btn-primary">
                     <i class="fas fa-sign-in-alt"></i> Vai al Login
                 </a>
             <?php else: ?>

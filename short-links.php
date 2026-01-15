@@ -6,7 +6,7 @@ require_once 'includes/qr_generator.php';
 
 // Controlla se l'utente è loggato
 if (!isset($_SESSION['user_id'])) {
-    header('Location: index.php');
+    header('Location: auth.php');
     exit();
 }
 

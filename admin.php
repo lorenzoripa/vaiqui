@@ -5,7 +5,7 @@ require_once 'includes/functions.php';
 
 // Verifica che l'utente sia loggato e sia admin
 if (!isset($_SESSION['user_id']) || !isAdmin($_SESSION['user_id'])) {
-    header('Location: index.php');
+    header('Location: auth.php');
     exit();
 }
 

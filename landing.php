@@ -612,7 +612,7 @@ if (isset($_SESSION['user_id'])) {
                 <a href="#testimonials">Testimonianze</a>
                 <a href="#faq">FAQ</a>
             </nav>
-            <a href="index.php" class="btn-header">Accedi</a>
+            <a href="auth.php" class="btn-header">Accedi</a>
         </div>
     </header>
 
@@ -645,7 +645,7 @@ if (isset($_SESSION['user_id'])) {
             </div>
 
             <div class="cta-buttons">
-                <a href="index.php" class="btn-hero btn-hero-primary">
+                <a href="auth.php" class="btn-hero btn-hero-primary">
                     <i class="fas fa-rocket"></i> Inizia Gratis
                 </a>
                 <a href="#demo" class="btn-hero btn-hero-secondary">
@@ -857,7 +857,7 @@ if (isset($_SESSION['user_id'])) {
         <div class="container">
             <h2>Inizia ora</h2>
             <p>Inizia a usare il coltellino svizzero per i marketer.</p>
-            <a href="index.php" class="btn-hero btn-hero-primary" style="font-size: 1.2rem; padding: 20px 50px;">
+            <a href="auth.php" class="btn-hero btn-hero-primary" style="font-size: 1.2rem; padding: 20px 50px;">
                 <i class="fas fa-rocket"></i> Registrati Gratis
             </a>
         </div>
